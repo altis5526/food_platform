@@ -1,4 +1,4 @@
-# food_platform
+# Food_platform
 This is a repository for the datbase assignment. Feel free to edit this file to list our progress.
 ## Git commands
 
@@ -25,7 +25,7 @@ You may need to set up your github token when pushing your updated files.
 
 --> `Developer Settings` --> `Personal access tokens`
 
---> `Generate new tokens` (Select scopes that sounds reasonable, I never remember what I've selected) 
+--> `Generate new tokens` (Select scopes that sound reasonable. I never remember what I've selected) 
 
 --> Done and copy the token when you execute **git push** on your terminal. (Remember to jot down your token as it won't show again once you leave the webpage.)
 
