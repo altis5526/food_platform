@@ -22,11 +22,11 @@ cd <to your "xampp/htdocs/myapp">
 ```
 You may need to set up your github token when pushing your updated files.
 
---> Settings (should be in the drop down menu your right upper screen)
+--> `Settings` (Should be in the drop down menu on your right upper screen)
 
---> Developer Settings --> Personal access tokens
+--> `Developer Settings` --> `Personal access tokens`
 
---> Generate new tokens (Select scopes that sounds reasonable, I never remember what I've selected) 
+--> `Generate new tokens` (Select scopes that sounds reasonable, I never remember what I've selected) 
 
 --> Done and copy the token when you execute **git push** on your terminal. (Remember to jot down your token as it won't show again once you leave the webpage.)
 
