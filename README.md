@@ -1,5 +1,5 @@
 # food_platform
-This is a repository for the datbase assignment.
+This is a repository for the datbase assignment. Feel free to edit this file to list our progress.
 ## Git commands
 
 I've worked this on Ubuntu and encountered execution errors when using Anaconda on Windows. So...you may still give a try on Windows.
