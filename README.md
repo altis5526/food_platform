@@ -37,6 +37,10 @@ You may need to set up your github token when pushing your updated files.
 ## Database dir so far
 ![image](https://user-images.githubusercontent.com/40194798/167246089-099a6c61-18a1-4fb7-8ba2-9af97035f39e.png)
 
+- the scheme
+![image](https://user-images.githubusercontent.com/35695972/167261937-2e0989ff-f665-4432-b980-a6504bcde208.png)
+
+
 Attributes in "login" relation
 * account_id
 * password
