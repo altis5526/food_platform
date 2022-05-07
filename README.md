@@ -40,8 +40,7 @@ You may need to set up your github token when pushing your updated files.
 - the scheme
 
 
-
-![image](https://user-images.githubusercontent.com/35695972/167261937-2e0989ff-f665-4432-b980-a6504bcde208.png)
+![image](https://user-images.githubusercontent.com/35695972/167262406-0700f941-f43e-4303-a126-a3848d40a1ee.png)
 
 
 Attributes in "login" relation
