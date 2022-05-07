@@ -29,6 +29,11 @@ You may need to set up your github token when pushing your updated files.
 
 --> Done and copy the token when you execute **git push** on your terminal. (Remember to jot down your token as it won't show again once you leave the webpage.)
 
+## Usage
+1. Activate xampp.
+2. Execute python code.
+3. Type in "http://localhost:5000/login" on your browser. (default port is 5000)
+
 ## Database dir so far
 ![image](https://user-images.githubusercontent.com/40194798/167246089-099a6c61-18a1-4fb7-8ba2-9af97035f39e.png)
 
