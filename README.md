@@ -2,7 +2,7 @@
 This is a repository for the datbase assignment.
 ## Git commands
 
-I've worked this on Ubuntu and encountered execution errors when using Anaconda on Windows.
+I've worked this on Ubuntu and encountered execution errors when using Anaconda on Windows. So...you may still give a try on Windows.
 ```
 ## For first time downloading
 cd <to your "xampp/htdocs/myapp">
