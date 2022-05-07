@@ -6,8 +6,7 @@ I've worked this on Ubuntu and encountered execution errors when using Anaconda 
 ```
 ## For first time downloading
 cd <to your "xampp/htdocs/myapp">
-* git clone <repository>
-* (git remote add origin https://github.com/altis5526/food_platform.git) **You may not need this line?**
+* git clone https://github.com/altis5526/food_platform.git
 
 ## For pushing
 * git add (--all or specify the file you want to add)
