@@ -17,7 +17,7 @@ cd <to your "xampp/htdocs/myapp">
 * git pull origin main
 
 ## Fetch all files from remote (**Notice: This would overwrite all files in your local dir. Make sure you really need this function!**)
-* git fetch -all
+* git fetch --all
 * git reset --hard origin/main
 
 ## Create branches
