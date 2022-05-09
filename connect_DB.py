@@ -100,6 +100,7 @@ def signup():
         mysql.connection.commit()
         flash("登入成功")
         cursor.close()
+        print("nono")
         
         return redirect(url_for('login'))
         
