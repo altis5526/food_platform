@@ -1,44 +1,68 @@
-from flask import Flask,render_template, request, flash, session, redirect, url_for
-from flask_mysqldb import MySQL
- 
+from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
+from flask import Flask,render_template, request, flash, session, redirect, url_for, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from sympy import Parabola
+from utils import * 
+import re
+
 app = Flask(__name__)
 app.secret_key = "2222222"
  
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'food_platform'
+# MySQL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root@localhost:3306/food_platform"
 
-mysql = MySQL(app)
+db = SQLAlchemy(app)
 
-#Creating a connection cursor
-if mysql:
-   print("Connection Successful!")
-else:
-   print("Connection Failed!") 
 
- 
+# init login manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+class User(UserMixin):
+    pass
+
+@login_manager.user_loader  
+def user_loader(ID):
+
+    data = db.session.query(user_).filter(user_.UID == ID).first()
+    if data == None:
+        return
+    user = User()
+    user.id = ID
+    return user
+
+
+## --------------------------------------- Web ------------------------------------------ ##
+
+
+@app.route('/')
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
     if request.method == 'GET':
         return render_template("login.html")
      
-    elif request.method == 'POST':
+    if request.method == 'POST':
         print(request.form)
         acc = request.form['Account']
         pw = request.form['password']
-        cursor = mysql.connection.cursor()
-        cursor.execute("SELECT account, password from user")
-        data = cursor.fetchall()
-        mysql.connection.commit()
-        for (account, password) in data:
-            if acc == account and pw == password:
-                return redirect(url_for('nav'))
-        cursor.close()
+        
+        # query db
+        data = db.session.query(user_).filter(user_.account == acc).first()
+        
+        if data.password == pw:
+            # login 
+            user = User()
+            user.id = data.UID 
+            login_user(user) 
+            return redirect(url_for('nav'))
+        
         flash("登入失敗")
         return redirect(url_for('login'))
     
 @app.route('/nav', methods = ['GET', 'POST'])
+@login_required
 def nav():
     return render_template("nav.html")
 
@@ -46,61 +70,74 @@ def nav():
 def signup():
     if request.method == 'GET':
         return render_template("sign-up.html")
-    
-    elif request.method == 'POST':
-        acc = request.form['_Account']
-        name = request.form['_name']
-        password = request.form['_password']
-        re_pass = request.form['_re-password']
-        phone_num = request.form['_phonenumber']
-        latitude = request.form['_latitude']
-        longitude = request.form['_longitude']
-        
-        cursor = mysql.connection.cursor()
-        cursor.execute("SELECT account from user")
-        mysql.connection.commit()
-        prev_accs = cursor.fetchall()
-        
-        if not name or not acc or not password or not re_pass or not phone_num or not latitude or not longitude:
-            flash("欄位空白！")
-            cursor.close()
-            return redirect(url_for('signup'))
 
-        elif (acc,) in prev_accs:
-            flash("帳號已被註冊！")
-            cursor.close()
-            return redirect(url_for('signup'))
-
-        elif len(phone_num) > 10 or not phone_num.isdigit():
-            flash("電話號碼格式錯誤(限10位以內數字)")
-            cursor.close()
-            return redirect(url_for('signup'))
-
-        elif not acc.isalpha():
-            flash("帳號格式錯誤(限大小寫英文)")
-            cursor.close()
-            return redirect(url_for('signup'))
-
-        elif not password.isalpha():
-            flash("密碼格式錯誤(限大小寫英文)")
-            cursor.close()
-            return redirect(url_for('signup'))
-
-        elif not latitude.isdigit() or not longitude.isdigit():
-            flash("經緯度格式錯誤(限數字)")
-            cursor.close()
-            return redirect(url_for('signup'))
+    if request.method == 'POST':
+        message = request.form
+        keys = ['name', 'phonenumber', 'Account', 'password', 're-password', 'latitude', 'longitude']
+        empty_message = {
+            'name': 'Name can\'t be empty.',
+            'phonenumber': 'Please fill in your phone number.',
+            'Account': 'Account can\'t be empty.',
+            'password': 'Please fill in your password.',
+            're-password': 'Please repeat your password.',
+            'latitude': 'latitude can\'t be empty', 
+            'longitude': 'longitude can\'t be empty'
+        }
+        error_message = {
+            'name': 'Your name must contain only latin letters.',
+            'phonenumber': 'Your phone number must be a 10-digit number.',
+            'Account': 'Your account must contain only latin letters and numbers.',
+            'latitude': 'Latitude must be a number between -90 and 90.', 
+            'longitude': 'Longitude must be a number between -180 and 180.'
+        }
+        Patterns = {
+            'name': lambda s : re.match('^[A-Za-z]+$', s) != None,
+            'phonenumber': lambda s : re.match('^\d{10}$', s) != None,
+            'Account': lambda s : re.match('^[a-zA-Z0-9]+$', s) != None,
+            'latitude': lambda s : isFloat(s) and -90 <= float(s) and 90 >= float(s),
+            'longitude': lambda s : isFloat(s) and -180 <= float(s) and 180 >= float(s)
+        }
+        ret = {'success': True}
         
-        elif password!=re_pass:
-            flash("密碼驗證不等於密碼！")
-            cursor.close()
-            return redirect(url_for('signup'))
-        
-        cursor.execute("INSERT INTO user (account, name, password, phone, lat, lng) VALUES (%s, %s, %s, %s, %s, %s)", (acc, name, password, int(phone_num), int(latitude), int(longitude)))
-        mysql.connection.commit()
-        flash("登入成功")
-        cursor.close()
-        
-        return redirect(url_for('login'))
-        
-app.run(host='localhost', port=5000)
+        for key in keys :
+            ret.update({key: ''})
+
+        # Check empty
+        for key in keys:
+            if key not in message.keys() or len(message[key]) == 0:
+                ret.update({key: empty_message[key]})
+                ret.update({'success': False})
+
+        # Check value
+        for key in Patterns.keys() :
+            if not Patterns[key](message[key]) :
+                ret.update({key: error_message[key]})
+                ret.update({'success': False})
+
+        # Check repeat 
+        if message['password'] != message['re-password'] :
+            ret.update({'re-password': 'Re-password is different from password.'})
+            ret.update({'success': False})
+
+        if ret['success'] :
+            
+            newuser = user_(None, 
+                         message['Account'],
+                         message['name'], 
+                         message['password'],
+                         message['phonenumber'],
+                         message['latitude'],
+                         message['longitude'])    
+
+            db.session.add(newuser)
+            db.session.commit()
+            
+
+        return jsonify(ret)
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return 'Logged out'
+
+app.run(host='localhost', port=5000, debug = True)
