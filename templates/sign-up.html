@@ -56,7 +56,7 @@
 
 	</head>
 	<body>
-	
+		
 		<div class="container">
 		
 			<div class="row">
@@ -64,45 +64,52 @@
 					
 
 					<!-- Start Sign In Form -->
-					<form action="#" class="fh5co-form animate-box" data-animate-effect="fadeIn">
+					<form class="fh5co-form animate-box" data-animate-effect="fadeIn">
 						<h2>Sign Up</h2>
 						<!-- <div class="form-group">
 							<div class="alert alert-success" role="alert">Your info has been saved.</div>
 						</div> -->
 						<div class="form-group">
 							<label for="name" class="sr-only">Name</label>
-							<input type="text" class="form-control" id="name" placeholder="Name" autocomplete="off">
+							<input type="text" name="Name" class="form-control" id="name" placeholder="Name" autocomplete="off">
+							<span style="color:red" id="name_error"> </span>
 						</div>
 						<div class="form-group">
 							<label for="name" class="sr-only">phonenumber</label>
-							<input type="text" class="form-control" id="phonenumber" placeholder="PhoneNumber" autocomplete="off">
+							<input type="text" name="phonenumber" class="form-control" id="phonenumber" placeholder="PhoneNumber" autocomplete="off">
+							<span style="color:red" id="phonenumber_error"> </span>
 						</div>
 						<div class="form-group">
 							<label for="Account" class="sr-only">Account</label>
-							<input type="text" class="form-control" id="Account" placeholder="Account" autocomplete="off">
+							<input type="text" name="account" class="form-control" id="Account" placeholder="Account" autocomplete="off">
+							<span style="color:red" id="Account_error"> </span>
 						</div>
 						<div class="form-group">
 							<label for="password" class="sr-only">Password</label>
-							<input type="password" class="form-control" id="password" placeholder="Password" autocomplete="off">
+							<input type="password" name="password" class="form-control" id="password" placeholder="Password" autocomplete="off">
+							<span style="color:red" id="password_error"> </span>
 						</div>
 						<div class="form-group">
 							<label for="re-password" class="sr-only">Re-type Password</label>
-							<input type="password" class="form-control" id="re-password" placeholder="Re-type Password" autocomplete="off">
+							<input type="password" name="re-password" class="form-control" id="re-password" placeholder="Re-type Password" autocomplete="off">
+							<span style="color:red" id="re-password_error"> </span>
 						</div>
 						<div class="form-group">
 							<label for="latitude" class="sr-only">latitude</label>
-							<input type="text" class="form-control" id="latitude" placeholder="Latitude" autocomplete="off">
+							<input type="text" name="latitude" class="form-control" id="latitude" placeholder="Latitude" autocomplete="off">
+							<span style="color:red" id="latitude_error"> </span>
 						</div>
 						<div class="form-group">
 							<label for="longitude" class="sr-only">longitude</label>
-							<input type="text" class="form-control" id="longitude" placeholder="longitude" autocomplete="off">
+							<input type="text" name="longitude" class="form-control" id="longitude" placeholder="longitude" autocomplete="off">
+							<span style="color:red" id="longitude_error"> </span>
 						</div>
 				
 						<div class="form-group">
 							<p>Already registered? <a href="login">Sign In</a></p>
 						</div>
 						<div class="form-group">
-							<input type="submit" value="Sign Up" class="btn btn-primary">
+							<input onclick="sent()" type="button" value="Sign Up" class="btn btn-primary">
 						</div>
 						
 					</form>
@@ -115,6 +122,51 @@
 			</div>
 		</div>
 	
+	<script>
+		$SCRIPT_ROOT = '{{ request.script_root|tojson|safe }}';
+		function sent() {
+			var form_data = new FormData();
+			form_data.append("name", $("#name").val());
+			form_data.append("phonenumber", $("#phonenumber").val());
+			form_data.append("Account", $("#Account").val());
+			form_data.append("password", $("#password").val());
+			form_data.append("re-password", $("#re-password").val());
+			form_data.append("latitude", $("#latitude").val());
+			form_data.append("longitude", $("#longitude").val());
+			$.ajax({
+				type: "POST",
+				url: '/sign-up',
+				data: form_data,
+				success: (data) => {
+					if(data.success) {
+						alert('Successfully registered, redirect to sign-in page.')
+						window.location.replace('/login');
+					}
+					else {
+						var keys = [
+							"name", 
+							"phonenumber",
+							"Account",
+							"password",
+							"re-password",
+							"latitude",
+							"longitude"
+						];
+						
+						for (let key in keys) {
+							let errorName = '#' + keys[key] + "_error";
+							$(errorName).text(data[keys[key]])
+						}
+
+					}
+				},
+				contentType: false,
+				processData: false,
+				dataType: "json"
+			});
+		}
+	</script>
+
 	<!-- jQuery -->
 	<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script> 
 	<!-- Bootstrap -->
