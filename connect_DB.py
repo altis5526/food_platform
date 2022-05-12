@@ -1,7 +1,6 @@
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
 from flask import Flask,render_template, request, flash, session, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
 from sympy import Parabola
 from utils import * 
 import re
@@ -14,7 +13,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root@localhost:3306/food_platform"
 
 db = SQLAlchemy(app)
-
 
 # init login manager
 login_manager = LoginManager()
@@ -36,7 +34,6 @@ def user_loader(ID):
 
 ## --------------------------------------- Web ------------------------------------------ ##
 
-
 @app.route('/')
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
@@ -51,7 +48,7 @@ def login():
         # query db
         data = db.session.query(user_).filter(user_.account == acc).first()
         
-        if data.password == pw:
+        if data != None and data.password == pw:
             # login 
             user = User()
             user.id = data.UID 
@@ -119,6 +116,13 @@ def signup():
             ret.update({'re-password': 'Re-password is different from password.'})
             ret.update({'success': False})
 
+        # Check account exists
+        data = db.session.query(user_).filter(user_.account == message['name']).first()
+
+        if data != None :
+            ret.update({'name': 'The account already exists.'})
+            ret.update({'success': False})
+
         if ret['success'] :
             
             newuser = user_(None, 
@@ -127,8 +131,8 @@ def signup():
                          message['password'],
                          message['phonenumber'],
                          message['latitude'],
-                         message['longitude'])    
-
+                         message['longitude'])
+                             
             db.session.add(newuser)
             db.session.commit()
             
@@ -138,6 +142,10 @@ def signup():
 @app.route('/logout')
 def logout():
     logout_user()
-    return 'Logged out'
+    return redirect(url_for('login'))
 
+<<<<<<< HEAD
 app.run(host='localhost', port=5000, debug = True)
+=======
+app.run(host = 'localhost', port = 5000, debug = True)
+>>>>>>> 7ba93e5c3162c57e7df09da1afbff9ffd3f4b2e7

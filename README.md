@@ -13,8 +13,12 @@ cd <to your "xampp/htdocs/myapp">
 * git commit -m <What did you change>
 * git push origin main
 
-## Update local repository
+## Update local repository (If faced with files updating conflicts, warning messages will pop up and you should choose the final uploading version)
 * git pull origin main
+
+## Fetch all files from remote (**Notice: This would overwrite all files in your local dir. Make sure you really need this function!**)
+* git fetch --all
+* git reset --hard origin/main
 
 ## Create branches
 * git branch <branch name>
