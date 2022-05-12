@@ -144,8 +144,4 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-<<<<<<< HEAD
-app.run(host='localhost', port=5000, debug = True)
-=======
 app.run(host = 'localhost', port = 5000, debug = True)
->>>>>>> 7ba93e5c3162c57e7df09da1afbff9ffd3f4b2e7
