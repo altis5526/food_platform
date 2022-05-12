@@ -34,7 +34,6 @@ def user_loader(ID):
 
 ## --------------------------------------- Web ------------------------------------------ ##
 
-
 @app.route('/')
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
@@ -145,4 +144,4 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-app.run(host='localhost', port=5000, debug = True)
+app.run(host = 'localhost', port = 5000, debug = True)
