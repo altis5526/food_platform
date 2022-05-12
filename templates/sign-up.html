@@ -121,9 +121,8 @@
 				<div class="col-md-12 text-center"><p><small>&copy; All Rights Reserved. Designed by <a href="https://freehtml5.co">FreeHTML5.co</a></small></p></div>
 			</div>
 		</div>
-	
+		
 	<script>
-		$SCRIPT_ROOT = '{{ request.script_root|tojson|safe }}';
 		function sent() {
 			var form_data = new FormData();
 			form_data.append("name", $("#name").val());
