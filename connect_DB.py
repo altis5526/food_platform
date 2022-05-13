@@ -61,7 +61,12 @@ def login():
 @app.route('/nav', methods = ['GET', 'POST'])
 @login_required
 def nav():
-    return render_template("nav.html")
+    curr_userID = current_user.get_id()
+    if request.method == 'GET':
+        shop_info = db.session.query(shop_).filter(shop_.UID == curr_userID).all()
+        return render_template("nav.html", information = shop_info)
+    elif request.method == 'POST':
+        return render_template("nav.html")
 
 @app.route('/sign-up', methods = ['GET', 'POST'])
 def signup():
@@ -122,6 +127,7 @@ def signup():
         if data != None :
             ret.update({'name': 'The account already exists.'})
             ret.update({'success': False})
+            
 
         if ret['success'] :
             
@@ -143,5 +149,5 @@ def signup():
 def logout():
     logout_user()
     return redirect(url_for('login'))
-
+    
 app.run(host = 'localhost', port = 5000, debug = True)
