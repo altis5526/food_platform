@@ -242,71 +242,103 @@
             <div id="menu1" class="tab-pane fade">
 
                 <h3> Start a business </h3>
-                {% for shop in information %}
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-xs-2">
-                                <label for="shop_name">shop name</label>
-                                <input class="form-control" id="shop_name" placeholder={{shop.shop_name}} type="text">
-                            </div>
-                            <div class="col-xs-2">
-                                <label for="food_category">shop category</label>
-                                <input class="form-control" id="food_category" placeholder={{shop.type}} type="text">
-                            </div>
-                            <div class="col-xs-2">
-                                <label for="latitude">latitude</label>
-                                <input class="form-control" id="latitude" placeholder={{shop.lat}} type="text">
-                            </div>
-                            <div class="col-xs-2">
-                                <label for="longitude">longitude</label>
-                                <input class="form-control" id="longitude" placeholder={{shop.lng}} type="text">
+                {% if information %}
+                    {% for shop in information %}
+                        <div class="form-group ">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    <label for="shop_name">shop name</label>
+                                    <input class="form-control" id="shop_name" placeholder={{shop.shop_name}} type="text">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label for="food_category">shop category</label>
+                                    <input class="form-control" id="food_category" placeholder={{shop.type}} type="text">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label for="latitude">latitude</label>
+                                    <input class="form-control" id="latitude" placeholder={{shop.lat}} type="text">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label for="longitude">longitude</label>
+                                    <input class="form-control" id="longitude" placeholder={{shop.lng}} type="text">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {%endfor%}
 
 
+                        <div class=" row" style=" margin-top: 25px;">
+                            <div class=" col-xs-3">
+                                <button type="button" id="register" class="btn btn-primary">register</button>
+                            </div>
+                        </div>
+                    {%endfor%}
+                {% else %}
+                    <div class="form-group ">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    <label for="shop_name">shop name</label>
+                                    <input class="form-control" id="shop_name" placeholder="shop name" type="text">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label for="food_category">shop category</label>
+                                    <input class="form-control" id="food_category" placeholder="shop category" type="text">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label for="latitude">latitude</label>
+                                    <input class="form-control" id="latitude" placeholder="latitude" type="text">
+                                </div>
+                                <div class="col-xs-2">
+                                    <label for="longitude">longitude</label>
+                                    <input class="form-control" id="longitude" placeholder="longitude" type="text">
+                                </div>
+                            </div>
+                        </div>
 
-                <div class=" row" style=" margin-top: 25px;">
-                    <div class=" col-xs-3">
-                        <button type="button" class="btn btn-primary">register</button>
-                    </div>
-                </div>
+
+                        <div class=" row" style=" margin-top: 25px;">
+                            <div class=" col-xs-3">
+                                <button type="button" id="register" class="btn btn-primary">register</button>
+                            </div>
+                        </div>
+                {% endif %}
                 <hr>
                 <h3>ADD</h3>
+                
+                <form id="upload-file" action="/nav" method="post" enctype="multipart/form-data">
+                    <div class="form-group ">
+                        <div class="row">
 
-                <div class="form-group ">
-                    <div class="row">
+                            <div class="col-xs-6">
+                                <label for="meal_name">meal name</label>
+                                <input class="form-control" id="meal_name" type="text">
+                            </div>
+                        </div>
+                        <div class="row" style=" margin-top: 15px;">
+                            <div class="col-xs-3">
+                                <label for="price">price</label>
+                                <input class="form-control" id="price" type="text">
+                            </div>
+                            <div class="col-xs-3">
+                                <label for="amount">amount</label>
+                                <input class="form-control" id="amount" type="text">
+                            </div>
+                        </div>
 
-                        <div class="col-xs-6">
-                            <label for="meal_name">meal name</label>
-                            <input class="form-control" id="meal_name" type="text">
+
+                        <div class="row" style=" margin-top: 25px;">
+                            <!-- hidden input -->
+                            <input type="hidden" id="add_item" value="add_item">
+                            <div class=" col-xs-3">
+                                <label for="myFile">上傳圖片</label>
+                                <input id="myFile" type="file" name="myFile" multiple class="file-loading">
+
+                            </div>
+                            <div class="form-group">
+                                <input onclick="sent_add()" type="button" value="Add" class="btn btn-primary">
+                            </div>
                         </div>
                     </div>
-                    <div class="row" style=" margin-top: 15px;">
-                        <div class="col-xs-3">
-                            <label for="price">price</label>
-                            <input class="form-control" id="price" type="text">
-                        </div>
-                        <div class="col-xs-3">
-                            <label for="quantity">quantity</label>
-                            <input class="form-control" id="quantity" type="text">
-                        </div>
-                    </div>
-
-
-                    <div class="row" style=" margin-top: 25px;">
-
-                        <div class=" col-xs-3">
-                            <label for="ex12">上傳圖片</label>
-                            <input id="myFile" type="file" name="myFile" multiple class="file-loading">
-
-                        </div>
-                        <div class="form-group">
-                            <input onclick="sent()" type="button" value="Add" class="btn btn-primary">
-                        </div>
-                    </div>
-                </div>
+                </form>
 
                 <div class="row">
                     <div class="  col-xs-8">
@@ -323,25 +355,26 @@
                                     <th scope="col">Delete</th>
                                 </tr>
                             </thead>
+                            {% for item in item_all %}
                             <tbody>
                                 <tr>
-                                    <th scope="row">1</th>
-                                    <td><img src="Picture/1.jpg" with="50" heigh="10" alt="Hamburger"></td>
-                                    <td>Hamburger</td>
+                                    <th scope="row">{{item.PID}}</th>
+                                    <td><img src="data:image/jpeg;base64,{{ item.content }}" width="50" height="50" alt={{item.item_name}}></td>
+                                    <td>{{item.item_name}}</td>
 
-                                    <td>80 </td>
-                                    <td>20 </td>
+                                    <td>{{item.price}}</td>
+                                    <td>{{item.amount}}</td>
                                     <td><button type="button" class="btn btn-info" data-toggle="modal"
-                                            data-target="#Hamburger-1">
+                                            data-target=#{{item.PID}}>
                                             Edit
                                         </button></td>
                                     <!-- Modal -->
-                                    <div class="modal fade" id="Hamburger-1" data-backdrop="static" tabindex="-1"
+                                    <div class="modal fade" id={{item.PID}} data-backdrop="static" tabindex="-1"
                                         role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title" id="staticBackdropLabel">Hamburger Edit</h5>
+                                                    <h5 class="modal-title" id="staticBackdropLabel">{{item.item_name}} Edit</h5>
                                                     <button type="button" class="close" data-dismiss="modal"
                                                         aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
@@ -350,76 +383,37 @@
                                                 <div class="modal-body">
                                                     <div class="row">
                                                         <div class="col-xs-6">
-                                                            <label for="ex71">price</label>
-                                                            <input class="form-control" id="ex71" type="text">
+                                                            <label for="{{item.item_name}}_new_price">price</label>
+                                                            <input class="form-control" id="{{item.item_name}}_new_price" type="text">
                                                         </div>
                                                         <div class="col-xs-6">
-                                                            <label for="ex41">quantity</label>
-                                                            <input class="form-control" id="ex41" type="text">
+                                                            <label for="{{item.item_name}}_new_quantity">quantity</label>
+                                                            <input class="form-control" id="{{item.item_name}}_new_quantity" type="text">
                                                         </div>
                                                     </div>
 
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-dismiss="modal">Edit</button>
+                                                    <input type="hidden" id="{{item.item_name}}_edit_item" value="edit_item">
+                                                    <input type="hidden" id="{{item.item_name}}_which_item" value={{item.item_name}}>
+                                                    <input onclick="edit('{{item.item_name}}')" type="button" value="Edit" class="btn btnn-secondary">
+                                                    
 
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <td><button type="button" class="btn btn-danger">Delete</button></td>
+                                    <td>
+                                        <form action="{{ url_for('nav') }}" method=post class=delete-movie>
+                                            <input type="hidden" id="{{item.item_name}}_delete_item" name="hidden" value="delete_item">
+                                            <input type="hidden" id="{{item.item_name}}_which_item" name="which_item" value={{item.item_name}}>
+                                            <input type=submit value=Delete value="Delete" class="btn btn-danger">
+                                        </form>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td><img src="Picture/2.jpg" with="10" heigh="10" alt="coffee"></td>
-                                    <td>coffee</td>
-
-                                    <td>50 </td>
-                                    <td>20</td>
-                                    <td><button type="button" class="btn btn-info" data-toggle="modal"
-                                            data-target="#coffee-1">
-                                            Edit
-                                        </button></td>
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="coffee-1" data-backdrop="static" tabindex="-1"
-                                        role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                        <div class="modal-dialog" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="staticBackdropLabel">coffee Edit</h5>
-                                                    <button type="button" class="close" data-dismiss="modal"
-                                                        aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <div class="col-xs-6">
-                                                            <label for="ex72">price</label>
-                                                            <input class="form-control" id="ex72" type="text">
-                                                        </div>
-                                                        <div class="col-xs-6">
-                                                            <label for="ex42">quantity</label>
-                                                            <input class="form-control" id="ex42" type="text">
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-dismiss="modal">Edit</button>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <td><button type="button" class="btn btn-danger">Delete</button></td>
-                                </tr>
-
+                                
                             </tbody>
+                            {% endfor %}
                         </table>
                     </div>
 
@@ -445,45 +439,52 @@
 
     <script>
         $SCRIPT_ROOT = '{{ request.script_root|tojson|safe }}';
-        function sent() {
-            var form_data = new FormData();
+        function sent_add() {
+            var form_data = new FormData($('#upload-file')[0]);
             form_data.append("meal_name", $("#meal_name").val());
             form_data.append("price", $("#price").val());
-            form_data.append("quantity", $("#quantity").val());
+            form_data.append("amount", $("#amount").val());
+            form_data.append("hidden", $("#add_item").val());
             $.ajax({
 				type: "POST",
 				url: '/nav',
 				data: form_data,
-				success: (data) => {
-					// if(data.success) {
-					// 	alert('Successfully added.')
-					// 	window.location.replace('/nav');
-					// }
-					// else {
-					// 	var keys = [
-					// 		"name", 
-					// 		"phonenumber",
-					// 		"Account",
-					// 		"password",
-					// 		"re-password",
-					// 		"latitude",
-					// 		"longitude"
-					// 	];
-						
-					// 	for (let key in keys) {
-					// 		let errorName = '#' + keys[key] + "_error";
-					// 		$(errorName).text(data[keys[key]])
-					// 	}
-
-					// }
-                    alert('Successfully added.')
-					window.location.replace('/nav');
-				},
 				contentType: false,
 				processData: false,
 				dataType: "json"
 			});
 
+        }
+        
+    </script>
+
+<script>
+    $SCRIPT_ROOT = '{{ request.script_root|tojson|safe }}';
+    function edit(item) {
+        var form_data = new FormData();
+        form_data.append("new_price", $("#"+item+"_new_price").val());
+        form_data.append("new_quantity", $("#"+item+"_new_quantity").val());
+        form_data.append("hidden", $("#"+item+"_edit_item").val());
+        form_data.append("item_name", $("#"+item+"_which_item").val());
+        $.ajax({
+            type: "POST",
+            url: '/nav',
+            data: form_data,
+            contentType: false,
+            processData: false,
+            dataType: "json"
+        });
+
+    }
+    
+</script>
+
+    <script>
+        var shop_info = '{{shop_info}}'
+        var regis_or_not = shop_info.length;
+
+        if(regis_or_not>2){
+            document.getElementById("register").disabled = true;
         }
     </script>
 

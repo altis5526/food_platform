@@ -1,9 +1,11 @@
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
-from flask import Flask,render_template, request, flash, session, redirect, url_for, jsonify
+from flask import Flask,render_template, request, flash, session, redirect, url_for, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
-from sympy import Parabola
+from sqlalchemy import and_, or_, not_
 from utils import * 
 import re
+from io import BytesIO
+import base64
 
 app = Flask(__name__)
 app.secret_key = "2222222"
@@ -20,6 +22,13 @@ login_manager.init_app(app)
 
 class User(UserMixin):
     pass
+
+# def read_image(filename):
+#     #Convert digital data to binary format
+#     with open(filename, 'rb') as f:
+#         photo = f.read()
+#         photo = photo.decode("utf-16")
+#     return photo
 
 @login_manager.user_loader  
 def user_loader(ID):
@@ -41,7 +50,7 @@ def login():
         return render_template("login.html")
      
     if request.method == 'POST':
-        print(request.form)
+        
         acc = request.form['Account']
         pw = request.form['password']
         
@@ -62,11 +71,68 @@ def login():
 @login_required
 def nav():
     curr_userID = current_user.get_id()
+    shop_info = db.session.query(shop_).filter(shop_.UID == curr_userID).all()
+    item_all = db.session.query(item_).filter(item_.SID == shop_info[0].SID).all()
+    
     if request.method == 'GET':
-        shop_info = db.session.query(shop_).filter(shop_.UID == curr_userID).all()
-        return render_template("nav.html", information = shop_info)
+        # Decode image from database
+        print(len(item_all))
+        for i in range(len(item_all)):
+            image = base64.b64encode(item_all[i].content).decode()
+            item_all[i].content = image
+        return render_template("nav.html", shop_info = shop_info, item_all = item_all)
+
     elif request.method == 'POST':
-        return render_template("nav.html")
+        # Add items
+        if request.form['hidden'] == "add_item":
+            item_info = request.form
+            img = request.files['myFile']
+            print(request.form)
+
+            newitem = item_(None, 
+                            shop_info[0].SID,  
+                            item_info["meal_name"],
+                            item_info["price"], 
+                            img.read(),
+                            item_info["amount"])
+                                
+            db.session.add(newitem)
+            db.session.commit()
+
+        # Edit items
+        elif request.form['hidden'] == "edit_item":
+            edit_item = request.form
+            pick_item = db.session.query(item_).filter(
+                                item_.SID == shop_info[0].SID,
+                                item_.item_name == edit_item['item_name']
+                                
+                        ).first()
+            pick_item.price = request.form['new_price']
+            pick_item.amount = request.form['new_quantity']
+        
+            db.session.commit()
+
+        elif request.form['hidden'] == "delete_item":
+            delete_item = request.form
+            pick_item = db.session.query(item_).filter(
+                                item_.SID == shop_info[0].SID,
+                                item_.item_name == delete_item['which_item']
+                                
+                        ).first()
+            print(pick_item)
+            if pick_item:
+                print("hello")
+                db.session.delete(pick_item)
+                db.session.commit()
+
+        return render_template("nav.html", shop_info = shop_info, item_all = item_all)
+
+# @app.route('/images/0.jpg')
+# def get_image():
+#     curr_userID = current_user.get_id()
+#     item_all = db.session.query(item_).filter(shop_.UID == curr_userID).all()
+#     download_img = send_file(BytesIO(download_img), mimetype='image/png', as_attachment=True, attachment_filename=True)
+#     return download_img
 
 @app.route('/sign-up', methods = ['GET', 'POST'])
 def signup():
