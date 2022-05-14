@@ -6,6 +6,7 @@ from utils import *
 import re
 from io import BytesIO
 import base64
+import sqlalchemy.orm
 
 app = Flask(__name__)
 app.secret_key = "2222222"
@@ -72,22 +73,23 @@ def login():
 def nav():
     curr_userID = current_user.get_id()
     shop_info = db.session.query(shop_).filter(shop_.UID == curr_userID).all()
-    item_all = db.session.query(item_).filter(item_.SID == shop_info[0].SID).all()
     
     if request.method == 'GET':
         # Decode image from database
-        print(len(item_all))
-        for i in range(len(item_all)):
-            image = base64.b64encode(item_all[i].content).decode()
-            item_all[i].content = image
-        return render_template("nav.html", shop_info = shop_info, item_all = item_all)
+        if shop_info:
+            item_all = db.session.query(item_).filter(item_.SID == shop_info[0].SID).all()
+            for i in range(len(item_all)):
+                image = base64.b64encode(item_all[i].content).decode()
+                item_all[i].content = image
+            return render_template("nav.html", shop_info = shop_info, item_all = item_all)
+        else:
+            return render_template("nav.html")
 
     elif request.method == 'POST':
         # Add items
         if request.form['hidden'] == "add_item":
             item_info = request.form
             img = request.files['myFile']
-            print(request.form)
 
             newitem = item_(None, 
                             shop_info[0].SID,  
@@ -96,8 +98,53 @@ def nav():
                             img.read(),
                             item_info["amount"])
                                 
-            db.session.add(newitem)
-            db.session.commit()
+            keys = ['meal_name', 'price', 'amount']
+            empty_message = {
+                'meal_name': 'Meal name can\'t be empty.',
+                'price': 'Price can\'t be empty.',
+                'amount': 'Quantity can\'t be empty.',
+                'myFile': 'You should at least upload an image.',
+            }
+
+            error_message = {
+                'meal_name': "",
+                'price': 'Your price must contain only non-negative numbers.',
+                'amount': 'Your quantity must contain only non-negative numbers.',
+            }
+
+            Patterns = {
+                'meal_name': lambda s: len(s)!=0,
+                'price': lambda s : (re.match('^\d+$', s) != None) and (int(s)>=0),
+                'amount': lambda s : (re.match('^\d+$', s) != None) and (int(s)>=0),
+            }
+
+            ret = {'success': True}
+
+            for key in keys :
+                ret.update({key: ''})
+
+            # Check type
+            for key in keys:
+                if not Patterns[key](item_info[key]) :
+                    ret.update({key: error_message[key]})
+                    ret.update({'success': False})
+            
+            # Check empty
+            for key in keys:
+                if key not in item_info.keys() or len(item_info[key]) == 0:
+                    ret.update({key: empty_message[key]})
+                    ret.update({'success': False})
+            if not img:
+                ret.update({'myFile': empty_message["myFile"]})
+                ret.update({'success': False})
+
+
+            if ret["success"]:
+                db.session.add(newitem)
+                db.session.commit()
+
+
+            return jsonify(ret)
 
         # Edit items
         elif request.form['hidden'] == "edit_item":
@@ -109,30 +156,68 @@ def nav():
                         ).first()
             pick_item.price = request.form['new_price']
             pick_item.amount = request.form['new_quantity']
-        
-            db.session.commit()
 
+            keys = ['new_price', 'new_quantity']
+            empty_message = {
+                'new_price': 'Price can\'t be empty.',
+                'new_quantity': 'Quantity can\'t be empty.',
+            }
+
+            error_message = {
+                'new_price': 'Your price must contain only non-negative numbers.',
+                'new_quantity': 'Your quantity must contain only non-negative numbers.',
+            }
+
+            Patterns = {
+                'new_price': lambda s : (re.match('^\d+$', s) != None) and (int(s)>=0),
+                'new_quantity': lambda s : (re.match('^\d+$', s) != None) and (int(s)>=0),
+            }
+
+            ret = {'success': True}
+
+            for key in keys :
+                ret.update({key: ''})
+
+            # Check type
+            for key in keys:
+                if not Patterns[key](edit_item[key]) :
+                    ret.update({key: error_message[key]})
+                    ret.update({'success': False})
+
+            # Check empty
+            for key in keys:
+                if key not in edit_item.keys() or len(edit_item[key]) == 0:
+                    ret.update({key: empty_message[key]})
+                    ret.update({'success': False})
+
+            if ret["success"]:
+                db.session.commit()
+            
+            return jsonify(ret)
+
+        # Delete items
         elif request.form['hidden'] == "delete_item":
             delete_item = request.form
-            pick_item = db.session.query(item_).filter(
+            db.session.query(item_).filter(
                                 item_.SID == shop_info[0].SID,
-                                item_.item_name == delete_item['which_item']
+                                item_.item_name == delete_item['item_name']
                                 
-                        ).first()
-            print(pick_item)
-            if pick_item:
-                print("hello")
-                db.session.delete(pick_item)
-                db.session.commit()
+                        ).delete()
+                
+            db.session.commit()
 
-        return render_template("nav.html", shop_info = shop_info, item_all = item_all)
+            ret = {'success': True}
 
-# @app.route('/images/0.jpg')
-# def get_image():
-#     curr_userID = current_user.get_id()
-#     item_all = db.session.query(item_).filter(shop_.UID == curr_userID).all()
-#     download_img = send_file(BytesIO(download_img), mimetype='image/png', as_attachment=True, attachment_filename=True)
-#     return download_img
+            return jsonify(ret)
+        
+        # # Update item image
+        # item_all = db.session.query(item_).filter(item_.SID == shop_info[0].SID).all()
+        # for i in range(len(item_all)):
+        #     image = base64.b64encode(item_all[i].content).decode()
+        #     item_all[i].content = image
+
+        # return render_template("nav.html", shop_info = shop_info, item_all = item_all)
+
 
 @app.route('/sign-up', methods = ['GET', 'POST'])
 def signup():
