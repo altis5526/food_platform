@@ -8,7 +8,8 @@ create table user (
     password varchar(256) NOT NULL, 
    	phone DECIMAL(10, 0),
     lat DECIMAL(10, 8) NOT NULL CHECK(lat >= -90.0 and lat <= 90.0),
-    lng DECIMAL(11, 8) NOT NULL CHECK(lat >= -180.0 and lat <= 180.0)
+    lng DECIMAL(11, 8) NOT NULL CHECK(lat >= -180.0 and lat <= 180.0),
+    balance NUMERIC(20, 0) DEFAULT 0
 );
 
 create table shop (
@@ -27,8 +28,9 @@ create table item (
     SID INT NOT NULL, 
     item_name varchar(256) NOT NULL,
     price numeric(20, 0) NOT NULL CHECK(price >= 0),
-    content varchar(256) NOT NULL,
-    FOREIGN KEY (SID) REFERENCES shop (SID) 
+    content LONGBOLB NOT NULL,
+    amount INT DEFAULT 0,
+    FOREIGN KEY (SID) REFERENCES shop (SID)  
 );
 
 create table order_instance (

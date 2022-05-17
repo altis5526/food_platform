@@ -2,493 +2,845 @@
 <html lang="en">
 
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap CSS -->
+  <!-- Bootstrap CSS -->
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <title>Hello, world!</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <title>Uber Panda</title>
+  <style>
+    .navbar-header-left {
+      width: 300px;
+      height: 120px;
+      border: 1px solid #000;
+      float: left
+    }
+  </style>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-inverse">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand " href="nav">資料庫啦啦啦的ubereat</a>
-                <a class="navbar-brand" href="logout">Logout</a>>
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand " href="#">Cool Website</a>
+      </div>
+      <div>
+        <a class="navbar-brand pull-right " href="/logout">logout</a>
+      </div>
+    </div>
+  </nav>
+  <div class="container">
+
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="#home">Home</a></li>
+      <li><a href="#menu1">shop</a></li>
+      <li><a href="#profile">profile</a></li>
+    </ul>
+
+    <div class="tab-content">
+
+
+
+
+
+
+
+
+
+      <div id="profile" class="tab-pane fade">
+
+        <h3>Profile</h3>
+        <div class="form-group ">
+          <div class="row">
+            <div class="col-xs-2">
+              <label for="ex5">Account</label>
+              <input class="form-control" id="accountInput" type="text" disabled value="{{info['userAccount']}}">
+
             </div>
+            <div class="col-xs-2">
+              <label for="ex5">Name</label>
+              <input class="form-control" id="nameInput" placeholder="enter your name" type="text"
+                value="{{info['userName']}}">
+              <span style="color:red" id="name_error"> </span>
+            </div>
+            <div class="col-xs-2">
+              <label for="ex6">Phone Number</label>
+              <input class="form-control" id="phoneInput" placeholder="enter your phone number" type="text"
+                value="{{info['userPhone']}}">
+              <span style="color:red" id="phone_error"> </span>
+            </div>
+          </div>
+        </div>
+
+        <h3>Position</h3>
+        <div class="form-group ">
+          <div class="row">
+            <div class="col-xs-2">
+              <label for="ex5">Latitude</label>
+              <input class="form-control" id="latInput" placeholder="enter your latitude" type="text"
+                value="{{info['userLatitude']}}">
+              <span style="color:red" id="latitude_error"> </span>
+            </div>
+            <div class="col-xs-2">
+              <label for="ex5">Longitude</label>
+              <input class="form-control" id="lngInput" placeholder="enter your longitude" type="text"
+                value="{{info['userLongitude']}}">
+              <span style="color:red" id="longitude_error"> </span>
+            </div>
+          </div>
+        </div>
+
+        <div class=" row" style=" margin-top: 25px;">
+          <div class=" col-xs-3">
+            <button type="button" onclick="update_profile()" class="btn btn-primary">update</button>
+          </div>
+        </div>
+
+        <hr>
+
+        <h3>Password</h3>
+        <div class="form-group ">
+          <div class="row">
+            <div class="col-xs-2">
+              <label for="ex5">Password</label>
+              <input type="password" class="form-control" id="passwordInput" placeholder="enter your password" value="">
+            </div>
+            <div class="col-xs-2">
+              <label for="ex5">Re-password</label>
+              <input type="password" class="form-control" id="repasswordInput" placeholder="reapeat your password"
+                value="">
+            </div>
+          </div>
+        </div>
+
+
+        <div class=" row" style=" margin-top: 25px;">
+          <div class=" col-xs-3">
+            <button onclick="update_password()" type="button" class="btn btn-primary">update</button>
+          </div>
+        </div>
+
+        <hr>
+        <h3>Balance</h3>
+        <div class="row" style=" margin-top: 25px;">
+
+          <div class=" col-xs-3">
+
+            <input class="form-control" id="balanceValue" type="text" value="{{info['userBalance']}}" disabled>
+
+
+          </div>
+          <div class=" col-xs-3">
+
+            <button type="button " style="margin-left: 5px;" class=" btn btn-info " data-toggle="modal"
+              data-target="#myModal">Add value</button>
+          </div>
+        </div>
+
+
+        <div class="row">
+          <div class="col-xs-10">
+            <!-- Modal -->
+
+            <div class="modal fade" id="myModal" data-backdrop="static" tabindex="-1" role="dialog"
+              aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog  modal-sm">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add value</h4>
+                  </div>
+                  <div class="modal-body">
+                    <input type="text" class="form-control" id="addInput" placeholder="enter add value">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" onclick="add()" class="btn btn-default" data-dismiss="modal">Add</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
-    </nav>
-    <div class="container">
 
-        <ul class="nav nav-tabs">
-            <li class="active"><a href="#home">Home</a></li>
-            <li><a href="#menu1">shop</a></li>
+      </div>
 
-        </ul>
 
-        <div class="tab-content">
-            <div id="home" class="tab-pane fade in active">
-                <h3>Profile</h3>
-                <div class="row">
-                    <div class="col-xs-10">
-                        Accouont: sherry, user, PhoneNumber: 0912345678, walletbalance: 100
-                        <!-- Modal -->
-                        <button type="button " style="margin-left: 5px;" class=" btn btn-info " data-toggle="modal"
-                            data-target="#myModal">Add value</button>
-                        <div class="modal fade" id="myModal" data-backdrop="static" tabindex="-1" role="dialog"
-                            aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog  modal-sm">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                        <h4 class="modal-title">Add value</h4>
-                                    </div>
-                                    <div class="modal-body">
-                                        <input type="text" class="form-control" id="Meal" placeholder="enter add value">
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-default" data-dismiss="modal">Add</button>
-                                    </div>
-                                </div>
-                            </div>
+
+      <div id="menu1" class="tab-pane fade">
+        <h3> Start a business </h3>
+        {% if info['hasShop'] %}
+        <div class="form-group ">
+          <div class="row">
+            <div class="col-xs-2">
+              <label for="shop_name">shop name</label>
+              <input class="form-control" id="shop_name" value="{{info['shop']['shop_name']}}" type="text">
+              <span style="color:red" id="shop_shop_name_error"> </span>
+            </div>
+            <div class="col-xs-2">
+              <label for="food_category">shop category</label>
+              <input class="form-control" id="food_category" value="{{info['shop']['food_category']}}" type="text">
+              <span style="color:red" id="food_category_error"> </span>
+            </div>
+            <div class="col-xs-2">
+              <label for="latitude">latitude</label>
+              <input class="form-control" id="shop_latitude" value="{{info['shop']['latitude']}}" type="text">
+              <span style="color:red" id="shop_latitude_error"> </span>
+            </div>
+            <div class="col-xs-2">
+              <label for="longitude">longitude</label>
+              <input class="form-control" id="shop_longitude" value="{{info['shop']['longitude']}}" type="text">
+              <span style="color:red" id="shop_longitude_error"> </span>
+            </div>
+          </div>
+        </div>
+        <div class=" row" style=" margin-top: 25px;">
+          <div class=" col-xs-3">
+            <button onclick="updShop()" type="button" class="btn btn-primary">update</button>
+          </div>
+        </div>
+        {% else %}
+        <div class="form-group ">
+          <div class="row">
+            <div class="col-xs-2">
+              <label for="shop_name">shop name</label>
+              <input class="form-control" id="shop_name" placeholder="shop name" type="text">
+              <span style="color:red" id="shop_shop_name_error"> </span>
+            </div>
+            <div class="col-xs-2">
+              <label for="food_category">shop category</label>
+              <input class="form-control" id="food_category" placeholder="food category" type="text">
+              <span style="color:red" id="food_category_error"> </span>
+            </div>
+            <div class="col-xs-2">
+              <label for="latitude">latitude</label>
+              <input class="form-control" id="shop_latitude" placeholder="latitude" type="text">
+              <span style="color:red" id="shop_latitude_error"> </span>
+            </div>
+            <div class="col-xs-2">
+              <label for="longitude">longitude</label>
+              <input class="form-control" id="shop_longitude" placeholder="longitude" type="text">
+              <span style="color:red" id="shop_longitude_error"> </span>
+            </div>
+          </div>
+        </div>
+        <div class=" row" style=" margin-top: 25px;">
+          <div class=" col-xs-3">
+            <button onclick="addShop()" type="button" class="btn btn-primary">register</button>
+          </div>
+        </div>
+        {% endif %}
+
+
+        {% if info['hasShop'] %}
+        <hr>
+        <h3>ADD</h3>
+        <form id="upload-file" action="/update" method="post" enctype="multipart/form-data">
+          <div class="form-group ">
+            <div class="row">
+
+              <div class="col-xs-6">
+                <label for="meal_name">meal name</label>
+                <input class="form-control" id="meal_name" type="text">
+                <span style="color:red" id="meal_name_error"> </span>
+              </div>
+            </div>
+            <div class="row" style=" margin-top: 15px;">
+              <div class="col-xs-3">
+                <label for="price">price</label>
+                <input class="form-control" id="price" type="text">
+                <span style="color:red" id="price_error"> </span>
+              </div>
+              <div class="col-xs-3">
+                <label for="amount">amount</label>
+                <input class="form-control" id="amount" type="text">
+                <span style="color:red" id="amount_error"> </span>
+              </div>
+            </div>
+
+
+            <div class="row" style=" margin-top: 25px;">
+              <!-- hidden input -->
+              <input type="hidden" id="add_item" value="add_item">
+              <div class=" col-xs-3">
+                <label for="myFile">上傳圖片</label>
+                <input id="myFile" type="file" name="myFile" multiple class="file-loading">
+                <span style="color:red" id="myFile_error"> </span>
+              </div>
+              <div class="form-group">
+                <input onclick="addItem()" type="button" value="Add" class="btn btn-primary">
+              </div>
+            </div>
+
+          </div>
+        </form>
+
+        {% if info['hasItem'] %}
+
+        <div class="row">
+          <div class="  col-xs-8">
+            <table class="table" style=" margin-top: 15px;">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Picture</th>
+                  <th scope="col">meal name</th>
+
+                  <th scope="col">price</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Edit</th>
+                  <th scope="col">Delete</th>
+                </tr>
+              </thead>
+
+              {% for item in info['items'] %}
+
+              <tbody>
+                <tr>
+                  <th scope="row">{{loop.index}}</th>
+                  <td><img src="data:image/jpeg;base64,{{ item.content }}" width="50" height="50"
+                      alt={{item.item_name}}></td>
+                  <td>{{item.item_name}}</td>
+
+                  <td>{{item.price}} </td>
+                  <td>{{item.amount}} </td>
+                  <td><button type="button" class="btn btn-info" data-toggle="modal" data-target=#{{item.PID}}>
+                      Edit
+                    </button>
+                  </td>
+                  <!-- Modal -->
+                  <div class="modal fade" id="{{item.PID}}" data-backdrop="static" tabindex="-1" role="dialog"
+                    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="staticBackdropLabel">{{item.item_name}} Edit</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
                         </div>
+                        <div class="modal-body">
+                          <div class="row">
+                            <div class="col-xs-6">
+                              <label for="{{item.PID}}_new_price">price</label>
+                              <input class="form-control" id="{{item.PID}}_new_price" type="text">
+                              <span style="color:red" id="{{item.PID}}_new_price_error"> </span>
+                            </div>
+                            <div class="col-xs-6">
+                              <label for="{{item.PID}}_new_quantity">quantity</label>
+                              <input class="form-control" id="{{item.PID}}_new_quantity" type="text">
+                              <span style="color:red" id="{{item.PID}}_new_quantity_error"> </span>
+                            </div>
+                          </div>
+
+                        </div>
+                        <div class="modal-footer">
+                          <input type="hidden" name="hidden" id="{{item.PID}}_edit_item" value="edit_item">
+                          <input type="hidden" id="{{item.PID}}_edit_which_item" value={{item.PID}}>
+                          <input onclick="editItem('{{item.PID}}')" type="submit" value="Edit"
+                            class="btn btnn-secondary">
+                        </div>
+                      </div>
                     </div>
+                  </div>
+                  <td>
+                    <input type="hidden" id="{{item.PID}}_delete_item" name="hidden" value="delete_item">
+                    <input type="hidden" id="{{item.PID}}_delete_which_item" name="which_item" value="{{item.PID}}">
+                    <input onclick="delItem('{{item.PID}}')" type="submit" value="Delete" class="btn btn-danger">
 
-                </div>
+                  </td>
+                </tr>
+              </tbody>
 
-                <!-- 
+              {% endfor %}
+
+            </table>
+          </div>
+
+        </div>
+        {% endif %}
+
+        {% endif %}
+
+      </div>
+
+
+      <div id="home" class="tab-pane fade in active">
+
+
+        <!-- 
                 
              -->
-                <h3>Search</h3>
-                <div class=" row  col-xs-8">
-                    <form class="form-horizontal" action="/action_page.php">
-                        <div class="form-group">
-                            <label class="control-label col-sm-1" for="Shop">Shop</label>
-                            <div class="col-sm-5">
-                                <input type="text" class="form-control" placeholder="Enter Shop name">
-                            </div>
-                            <label class="control-label col-sm-1" for="distance">distance</label>
-                            <div class="col-sm-5">
+        <h3>Search</h3>
+        <div class=" row  col-xs-8">
+          <form class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label col-sm-1" for="Shop">Shop</label>
+              <div class="col-sm-5">
+                <input type="text" class="form-control" placeholder="Enter Shop name" id="shopNameInput">
+              </div>
+              <label class="control-label col-sm-1" for="distance">distance</label>
+              <div class="col-sm-5">
+                <select class="form-control" id="distanceInput">
+                  <option value="">select distance</option>
+                  <option value="near">near</option>
+                  <option value="medium">medium </option>
+                  <option value="far">far</option>
+                </select>
+              </div>
 
-
-                                <select class="form-control" id="sel1">
-                                    <option>near</option>
-                                    <option>medium </option>
-                                    <option>far</option>
-
-                                </select>
-                            </div>
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label class="control-label col-sm-1" for="Price">Price</label>
-                            <div class="col-sm-2">
-
-                                <input type="text" class="form-control">
-
-                            </div>
-                            <label class="control-label col-sm-1" for="~">~</label>
-                            <div class="col-sm-2">
-
-                                <input type="text" class="form-control">
-
-                            </div>
-                            <label class="control-label col-sm-1" for="Meal">Meal</label>
-                            <div class="col-sm-5">
-                                <input type="text" list="Meals" class="form-control" id="Meal" placeholder="Enter Meal">
-                                <datalist id="Meals">
-                                    <option value="Hamburger">
-                                    <option value="coffee">
-                                </datalist>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="control-label col-sm-1" for="category"> category</label>
-
-
-                            <div class="col-sm-5">
-                                <input type="text" list="categorys" class="form-control" id="category"
-                                    placeholder="Enter shop category">
-                                <datalist id="categorys">
-                                    <option value="fast food">
-
-                                </datalist>
-                            </div>
-                            <button type="submit" style="margin-left: 18px;" class="btn btn-primary">Search</button>
-
-                        </div>
-                    </form>
-                </div>
-                <div class="row">
-                    <div class="  col-xs-8">
-                        <table class="table" style=" margin-top: 15px;">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-
-                                    <th scope="col">shop name</th>
-                                    <th scope="col">shop category</th>
-                                    <th scope="col">Distance</th>
-
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th scope="row">1</th>
-
-                                    <td>macdonald</td>
-                                    <td>fast food</td>
-
-                                    <td>near </td>
-                                    <td> <button type="button" class="btn btn-info " data-toggle="modal"
-                                            data-target="#macdonald">Open menu</button></td>
-
-                                </tr>
-
-
-                            </tbody>
-                        </table>
-
-                        <!-- Modal -->
-                        <div class="modal fade" id="macdonald" data-backdrop="static" tabindex="-1" role="dialog"
-                            aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-
-                                <!-- Modal content-->
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                        <h4 class="modal-title">menu</h4>
-                                    </div>
-                                    <div class="modal-body">
-                                        <!--  -->
-
-                                        <div class="row">
-                                            <div class="  col-xs-12">
-                                                <table class="table" style=" margin-top: 15px;">
-                                                    <thead>
-                                                        <tr>
-                                                            <th scope="col">#</th>
-                                                            <th scope="col">Picture</th>
-
-                                                            <th scope="col">meal name</th>
-
-                                                            <th scope="col">price</th>
-                                                            <th scope="col">Quantity</th>
-
-                                                            <th scope="col">Order check</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <th scope="row">1</th>
-                                                            <td><img src="Picture/1.jpg" with="50" heigh="10"
-                                                                    alt="Hamburger"></td>
-
-                                                            <td>Hamburger</td>
-
-                                                            <td>80 </td>
-                                                            <td>20 </td>
-
-                                                            <td> <input type="checkbox" id="cbox1" value="Hamburger">
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th scope="row">2</th>
-                                                            <td><img src="Picture/2.jpg" with="10" heigh="10"
-                                                                    alt="coffee"></td>
-
-                                                            <td>coffee</td>
-
-                                                            <td>50 </td>
-                                                            <td>20</td>
-
-                                                            <td><input type="checkbox" id="cbox2" value="coffee"></td>
-                                                        </tr>
-
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                        </div>
-
-
-                                        <!--  -->
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-default"
-                                            data-dismiss="modal">Order</button>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
             </div>
-            <div id="menu1" class="tab-pane fade">
 
-                <h3> Start a business </h3>
-                {% for shop in information %}
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-xs-2">
-                                <label for="shop_name">shop name</label>
-                                <input class="form-control" id="shop_name" placeholder={{shop.shop_name}} type="text">
-                            </div>
-                            <div class="col-xs-2">
-                                <label for="food_category">shop category</label>
-                                <input class="form-control" id="food_category" placeholder={{shop.type}} type="text">
-                            </div>
-                            <div class="col-xs-2">
-                                <label for="latitude">latitude</label>
-                                <input class="form-control" id="latitude" placeholder={{shop.lat}} type="text">
-                            </div>
-                            <div class="col-xs-2">
-                                <label for="longitude">longitude</label>
-                                <input class="form-control" id="longitude" placeholder={{shop.lng}} type="text">
-                            </div>
-                        </div>
-                    </div>
-                {%endfor%}
+            <div class="form-group">
+
+              <label class="control-label col-sm-1" for="Price">Price</label>
+              <div class="col-sm-2">
+
+                <input type="text" class="form-control" id="lowerPriceInput">
+
+              </div>
+              <label class="control-label col-sm-1" for="~">~</label>
+              <div class="col-sm-2">
+
+                <input type="text" class="form-control" id="upperPriceInput">
+
+              </div>
+              <label class="control-label col-sm-1" for="Meal">Meal</label>
+              <div class="col-sm-5">
+                <input type="text" list="Meals" class="form-control" id="mealInput" placeholder="Enter Meal">
+                <datalist id="Meals">
+                  <option value="Hamburger">
+                  <option value="coffee">
+                </datalist>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label col-sm-1" for="category"> category</label>
 
 
+              <div class="col-sm-5">
+                <input type="text" list="categorys" class="form-control" id="categoryInput"
+                  placeholder="Enter shop category">
+                <datalist id="categorys">
+                  <option value="fast food">
 
-                <div class=" row" style=" margin-top: 25px;">
-                    <div class=" col-xs-3">
-                        <button type="button" class="btn btn-primary">register</button>
-                    </div>
-                </div>
-                <hr>
-                <h3>ADD</h3>
+                </datalist>
+              </div>
+              <button onclick="search()" style="margin-left: 18px;" class="btn btn-primary">Search</button>
 
-                <div class="form-group ">
+            </div>
+          </form>
+        </div>
+
+        <div class="row">
+          <div class="  col-xs-8">
+            <table class="table" style=" margin-top: 15px;">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+
+                  <th scope="col">shop name</th>
+                  <th scope="col">shop category</th>
+                  <th scope="col">Distance</th>
+
+                </tr>
+              </thead>
+              <tbody id="shopList">
+                <tr>
+                  <th scope="row">1</th>
+
+                  <td>macdonald</td>
+                  <td>fast food</td>
+
+                  <td>near </td>
+                  <td> <button type="button" class="btn btn-info " data-toggle="modal" data-target="#macdonald">Open
+                      menu</button>
+                  </td>
+
+                </tr>
+
+
+              </tbody>
+            </table>
+
+            <!-- Modal -->
+            <div class="modal fade" id="macdonald" data-backdrop="static" tabindex="-1" role="dialog"
+              aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">menu</h4>
+                  </div>
+                  <div class="modal-body">
+                    <!--  -->
+
                     <div class="row">
-
-                        <div class="col-xs-6">
-                            <label for="meal_name">meal name</label>
-                            <input class="form-control" id="meal_name" type="text">
-                        </div>
-                    </div>
-                    <div class="row" style=" margin-top: 15px;">
-                        <div class="col-xs-3">
-                            <label for="price">price</label>
-                            <input class="form-control" id="price" type="text">
-                        </div>
-                        <div class="col-xs-3">
-                            <label for="quantity">quantity</label>
-                            <input class="form-control" id="quantity" type="text">
-                        </div>
-                    </div>
-
-
-                    <div class="row" style=" margin-top: 25px;">
-
-                        <div class=" col-xs-3">
-                            <label for="ex12">上傳圖片</label>
-                            <input id="myFile" type="file" name="myFile" multiple class="file-loading">
-
-                        </div>
-                        <div class="form-group">
-                            <input onclick="sent()" type="button" value="Add" class="btn btn-primary">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="  col-xs-8">
+                      <div class="  col-xs-12">
                         <table class="table" style=" margin-top: 15px;">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Picture</th>
-                                    <th scope="col">meal name</th>
+                          <thead>
+                            <tr>
+                              <th scope="col">#</th>
+                              <th scope="col">Picture</th>
 
-                                    <th scope="col">price</th>
-                                    <th scope="col">Quantity</th>
-                                    <th scope="col">Edit</th>
-                                    <th scope="col">Delete</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th scope="row">1</th>
-                                    <td><img src="Picture/1.jpg" with="50" heigh="10" alt="Hamburger"></td>
-                                    <td>Hamburger</td>
+                              <th scope="col">meal name</th>
 
-                                    <td>80 </td>
-                                    <td>20 </td>
-                                    <td><button type="button" class="btn btn-info" data-toggle="modal"
-                                            data-target="#Hamburger-1">
-                                            Edit
-                                        </button></td>
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="Hamburger-1" data-backdrop="static" tabindex="-1"
-                                        role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                        <div class="modal-dialog" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="staticBackdropLabel">Hamburger Edit</h5>
-                                                    <button type="button" class="close" data-dismiss="modal"
-                                                        aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <div class="col-xs-6">
-                                                            <label for="ex71">price</label>
-                                                            <input class="form-control" id="ex71" type="text">
-                                                        </div>
-                                                        <div class="col-xs-6">
-                                                            <label for="ex41">quantity</label>
-                                                            <input class="form-control" id="ex41" type="text">
-                                                        </div>
-                                                    </div>
+                              <th scope="col">price</th>
+                              <th scope="col">Quantity</th>
 
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-dismiss="modal">Edit</button>
+                              <th scope="col">Order check</th>
+                            </tr>
+                          </thead>
+                          <tbody>
 
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <td><button type="button" class="btn btn-danger">Delete</button></td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td><img src="Picture/2.jpg" with="10" heigh="10" alt="coffee"></td>
-                                    <td>coffee</td>
+                            <tr>
+                              <th scope="row">1</th>
+                              <td><img src="Picture/1.jpg" with="50" heigh="10" alt="Hamburger"></td>
 
-                                    <td>50 </td>
-                                    <td>20</td>
-                                    <td><button type="button" class="btn btn-info" data-toggle="modal"
-                                            data-target="#coffee-1">
-                                            Edit
-                                        </button></td>
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="coffee-1" data-backdrop="static" tabindex="-1"
-                                        role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                        <div class="modal-dialog" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="staticBackdropLabel">coffee Edit</h5>
-                                                    <button type="button" class="close" data-dismiss="modal"
-                                                        aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <div class="col-xs-6">
-                                                            <label for="ex72">price</label>
-                                                            <input class="form-control" id="ex72" type="text">
-                                                        </div>
-                                                        <div class="col-xs-6">
-                                                            <label for="ex42">quantity</label>
-                                                            <input class="form-control" id="ex42" type="text">
-                                                        </div>
-                                                    </div>
+                              <td>Hamburger</td>
 
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-dismiss="modal">Edit</button>
+                              <td>80 </td>
+                              <td>20 </td>
 
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                              <td> <input type="checkbox" id="cbox1" value="Hamburger"></td>
+                            </tr>
+                            <tr>
+                              <th scope="row">2</th>
+                              <td><img src="Picture/2.jpg" with="10" heigh="10" alt="coffee"></td>
+
+                              <td>coffee</td>
+
+                              <td>50 </td>
+                              <td>20</td>
+
+                              <td><input type="checkbox" id="cbox2" value="coffee"></td>
+                            </tr>
 
 
-                                    <td><button type="button" class="btn btn-danger">Delete</button></td>
-                                </tr>
 
-                            </tbody>
+
+
+
+
+
+
+                          </tbody>
                         </table>
+                      </div>
+
                     </div>
 
+
+                    <!--  -->
+                  </div>
+                  <div class="modal-footer">
+                    <button onclick="sendOrder()" type="button" class="btn btn-default"
+                      data-dismiss="modal">Order</button>
+                  </div>
                 </div>
 
-
+              </div>
             </div>
 
 
+
+
+          </div>
 
         </div>
+
+
+
+
+
+
+
+
+      </div>
+
+
     </div>
+  </div>
 
-    <!-- Option 1: Bootstrap Bundle with Popper -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
-    <script>
-        $(document).ready(function () {
-            $(".nav-tabs a").click(function () {
-                $(this).tab('show');
-            });
-        });
-    </script>
+  <!-- Option 1: Bootstrap Bundle with Popper -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
+  <script>
+    $(document).ready(function () {
+      $(".nav-tabs a").click(function () {
+        $(this).tab('show');
+      });
+    });
 
-    <script>
-        $SCRIPT_ROOT = '{{ request.script_root|tojson|safe }}';
-        function sent() {
-            var form_data = new FormData();
-            form_data.append("meal_name", $("#meal_name").val());
-            form_data.append("price", $("#price").val());
-            form_data.append("quantity", $("#quantity").val());
-            $.ajax({
-				type: "POST",
-				url: '/nav',
-				data: form_data,
-				success: (data) => {
-					// if(data.success) {
-					// 	alert('Successfully added.')
-					// 	window.location.replace('/nav');
-					// }
-					// else {
-					// 	var keys = [
-					// 		"name", 
-					// 		"phonenumber",
-					// 		"Account",
-					// 		"password",
-					// 		"re-password",
-					// 		"latitude",
-					// 		"longitude"
-					// 	];
-						
-					// 	for (let key in keys) {
-					// 		let errorName = '#' + keys[key] + "_error";
-					// 		$(errorName).text(data[keys[key]])
-					// 	}
+    function sendOrder() {
+      alert("nothing will be sent....");
+    }
 
-					// }
-                    alert('Successfully added.')
-					window.location.replace('/nav');
-				},
-				contentType: false,
-				processData: false,
-				dataType: "json"
-			});
+    function addShop() {
+      var form_data = new FormData();
+      form_data.append("shop_name", $("#shop_name").val());
+      form_data.append("food_category", $("#food_category").val());
+      form_data.append("latitude", $("#shop_latitude").val());
+      form_data.append("longitude", $("#shop_longitude").val());
+      form_data.append("type", "addShop");
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('Successfully registered a shop!!!');
+            window.location.replace('/nav');
+          } else {
+            var keys = [
+              "shop_name",
+              "food_category",
+              "latitude",
+              "longitude"
+            ];
+            for (let key in keys) {
+              let errorName = "#shop_" + keys[key] + "_error";
+              $(errorName).text(data[keys[key]]);
+            }
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
 
-        }
-    </script>
+    function updShop() {
+      var form_data = new FormData();
+      form_data.append("shop_name", $("#shop_name").val());
+      form_data.append("food_category", $("#food_category").val());
+      form_data.append("latitude", $("#shop_latitude").val());
+      form_data.append("longitude", $("#shop_longitude").val());
+      form_data.append("type", "updShop");
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('Successfully update your shop!!!');
+            window.location.replace('/nav');
+          } else {
+            var keys = [
+              "shop_name",
+              "food_category",
+              "latitude",
+              "longitude"
+            ];
+            for (let key in keys) {
+              let errorName = "#shop_" + keys[key] + "_error";
+              $(errorName).text(data[keys[key]]);
+            }
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
 
-    <!-- Option 2: Separate Popper and Bootstrap JS -->
-    <!--
+    function addItem() {
+      var form_data = new FormData($('#upload-file')[0]);
+      form_data.append("meal_name", $("#meal_name").val());
+      form_data.append("price", $("#price").val());
+      form_data.append("amount", $("#amount").val());
+      form_data.append("type", 'add_item');
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('Successfully added an item.')
+            window.location.replace('/nav');
+          } else {
+            var keys = [
+              "meal_name",
+              "price",
+              "amount",
+              "myFile"
+            ];
+
+            for (let key in keys) {
+              let errorName = '#' + keys[key] + "_error";
+              $(errorName).text(data[keys[key]])
+            }
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
+    function editItem(item) {
+      var form_data = new FormData();
+      form_data.append("price", $("#" + item + "_new_price").val());
+      form_data.append("amount", $("#" + item + "_new_quantity").val());
+      form_data.append("PID", $("#" + item + "_edit_which_item").val());
+      form_data.append("type", "editItem");
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('Successfully Edited.')
+            window.location.replace('/nav');
+          } else {
+            var keys = [
+              "new_price",
+              "new_quantity",
+            ];
+
+            for (let key in keys) {
+              let errorName = '#' + item + "_" + keys[key] + "_error";
+              $(errorName).text(data[keys[key]])
+            }
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
+    function delItem(item) {
+      var form_data = new FormData();
+      form_data.append("PID", $("#" + item + "_delete_which_item").val());
+      form_data.append("type", "delete_item");
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('Successfully deleted.')
+            window.location.replace('/nav');
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+
+    }
+
+    function search() {
+      var form_data = new FormData();
+      form_data.append("shopName", $("#shopNameInput").val());
+      form_data.append("lowerPrice", $("#lowerPriceInput").val());
+      form_data.append("upperPrice", $("#upperPriceInput").val());
+      form_data.append("meal", $("#mealInput").val());
+      form_data.append("distance", $("#distanceInput").val());
+      form_data.append("category", $("#categoryInput").val());
+      form_data.append("type", "findShop");
+      $.ajax({
+        type: "POST",
+        url: "/ask",
+        data: form_data,
+        success: (data) => {
+
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
+    function update_profile() {
+      var form_data = new FormData();
+      form_data.append("name", $("#nameInput").val());
+      form_data.append("phonenumber", $("#phoneInput").val());
+      form_data.append("latitude", $("#latInput").val());
+      form_data.append("longitude", $("#lngInput").val());
+      form_data.append("type", "profile");
+      $.ajax({
+        type: "POST",
+        url: "/update",
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('update successfully!!');
+          }
+          var keys = [
+            "name",
+            "phonenumber",
+            "latitude",
+            "longitude"
+          ]
+
+          for (let key in keys) {
+            let errorName = '#' + keys[key] + "_error";
+            $(errorName).text(data[keys[key]])
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
+    function update_password() {
+      var form_data = new FormData();
+      form_data.append("password", $("#passwordInput").val());
+      form_data.append("repassword", $("#repasswordInput").val());
+      form_data.append("type", "password");
+      $.ajax({
+        type: "POST",
+        url: "/update",
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('update successfully!!');
+          } else {
+            alert(data.message);
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
+    function add() {
+      var form_data = new FormData();
+      form_data.append("add", $("#addInput").val());
+      form_data.append("type", "add");
+      $.ajax({
+        type: "POST",
+        url: "/update",
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            document.getElementById('balanceValue').value = data.value
+          } else {
+            alert(data.message);
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+  </script>
+
+  <!-- Option 2: Separate Popper and Bootstrap JS -->
+  <!--
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
     -->
