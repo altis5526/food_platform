@@ -39,13 +39,11 @@ You may need to set up your github token when pushing your updated files.
 3. Type in "http://localhost:5000/login" on your browser. (default port is 5000)
 
 ## Database dir so far
-![image](https://user-images.githubusercontent.com/35695972/168868923-00031a04-0e81-45b4-973f-f711323b2b8f.png)
-
 
 - the scheme
 
 
-![image](https://user-images.githubusercontent.com/35695972/167262406-0700f941-f43e-4303-a126-a3848d40a1ee.png)
+![image](https://user-images.githubusercontent.com/35695972/168868923-00031a04-0e81-45b4-973f-f711323b2b8f.png)
 
 
 Attributes in "login" relation
