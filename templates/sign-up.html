@@ -123,7 +123,6 @@
 		</div>
 	
 	<script>
-		$SCRIPT_ROOT = '{{ request.script_root|tojson|safe }}';
 		function sent() {
 			var form_data = new FormData();
 			form_data.append("name", $("#name").val());

@@ -316,9 +316,6 @@ def nav():
     return render_template('nav.html', info = info)
 
 
-
-
-
 @app.route('/sign-up', methods = ['GET', 'POST'])
 def signup():
     if request.method == 'GET':
