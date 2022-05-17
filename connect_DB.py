@@ -3,7 +3,7 @@ from unicodedata import category
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
 from flask import Flask,render_template, request, flash, session, redirect, url_for, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import or_, and_
+from sqlalchemy import *
 from functools import wraps
 from numpy import Inf
 from utils import * 
@@ -14,7 +14,7 @@ app.secret_key = "2222222"
  
 # MySQL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root@localhost:3306/food_platform"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root@localhost:3306/food_platform"
 
 db = SQLAlchemy(app)
 
@@ -105,6 +105,8 @@ def update():
 
             data.lat = message['latitude']
             data.lng = message['longitude']
+            data.position = 'POINT({} {})'.format(message['latitude'], message['longitude'])
+            print('success')
 
             db.session.commit()
             
@@ -156,6 +158,7 @@ def update():
             yourShop.type = message['food_category']
             yourShop.lat = message['latitude']
             yourShop.lng = message['longitude']
+            yourShop.position = 'POINT({} {})'.format(message['latitude'], message['longitude'])
 
             db.session.commit()
 
@@ -236,25 +239,70 @@ def ask():
         shopNames = message['shopName'].split()
         categorys = message['category'].split() # shop type
         distance = 1000000000000000 if not isFloat(message['distance']) else float(message['distance'])
-                
-        rule = and_(
-            *[shop_.shop_name.like('%' + shopName + '%') for shopName in shopNames], 
-            *[shop_.type.like('%' + cat + '%') for cat in categorys], 
-            True if distance is None else  shop_.lat < distance
-        )
         
-        # First select SID with filter on distance, type, and shopName
-        shops = db.session.query(shop_.SID).filter(rule).all() 
-        
-
-        # Use the SID to select the 
         meals = message['meal'].split()
         lowerPrice = None if not isInteger(message['lowerPrice']) else int(message['lowerPrice'])
         upperPrice = None if not isInteger(message['upperPrice']) else int(message['upperPrice'])
-
         
+        filter_item = False
+        if len(meals) > 0 or lowerPrice is not None or upperPrice is not None :
+            filter_item = True
 
-        print(shops)
+        userID = session.get('_user_id')
+        userPos = str(db.session.query(user_.position).filter(user_.UID == userID).first()[0])
+
+        if filter_item:
+
+            # select with constrain on shop
+            
+            rule1 = and_(
+                *[shop_.shop_name.like('%' + shopName + '%') for shopName in shopNames], 
+                *[shop_.type.like('%' + cat + '%') for cat in categorys], 
+                True if distance is None else  func.ST_Distance_Sphere(func.ST_GeomFromText(shop_.position), func.ST_GeomFromText(userPos)) < distance
+            )
+            # First select SID with filter on distance, type, and shopName
+            shops1 = db.session.query(shop_.SID).filter(rule1).all() 
+
+            
+            # select with constrain on item
+            rule2 = and_(
+                item_.SID.in_(shops1),
+                *[item_.item_name.like('%' + item_name + '%') for item_name in meals],
+                True if lowerPrice is None else item_.price >= lowerPrice,
+                True if upperPrice is None else item_.price <= upperPrice,
+            )
+        
+            shops2 = db.session.query(item_.SID).filter(rule2).all()
+
+            result = db.session.query(shop_).filter(shop_.SID.in_(shops2))
+            """
+            with shop2 as (
+                with shop1 as (
+                    select SID from shop where rule1_is_matched
+                )
+                select SID
+                from shop
+                where SID in shop1.SID and rule2_is_matched
+            )
+            select * from shop where SID in result
+            """
+        else :
+
+            rule1 = and_(
+                *[shop_.shop_name.like('%' + shopName + '%') for shopName in shopNames], 
+                *[shop_.type.like('%' + cat + '%') for cat in categorys], 
+                True if distance is None else  func.ST_Distance_Sphere(func.ST_GeomFromText(shop_.position), func.ST_GeomFromText(userPos)) < distance
+            )
+            result = db.session.query(shop_).filter(rule1).all() 
+
+            """
+            with shop1 as (
+                select SID from shop where rule1_is_matched
+            )
+            select * from shop where SID in shop1.SID
+            """
+
+        print('Searching result: ', result)
         ret = {'success': False}
         ret.update({'shop': []})
         # ret['shop'].append()

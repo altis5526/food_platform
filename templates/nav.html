@@ -584,12 +584,13 @@
     });
 
     function loadShopTable() {
+      var dist = {"":"", "near": "1000", "medium": 10000, "far": 1000000}
       var form_data = new FormData();
       form_data.append("shopName", $("#shopNameInput").val());
       form_data.append("lowerPrice", $("#lowerPriceInput").val());
       form_data.append("upperPrice", $("#upperPriceInput").val());
       form_data.append("meal", $("#mealInput").val());
-      form_data.append("distance", $("#distanceInput").val());
+      form_data.append("distance", dist[$("#distanceInput").val()]);
       form_data.append("category", $("#categoryInput").val());
       form_data.append("type", "findShop");
       $.ajax({
@@ -609,7 +610,7 @@
           url: "/ask",
           type: "POST"
         },
-        "data": [['a', 'b'], ['c', 'd']]
+        data: [['a', 'b'], ['c', 'd']]
       });
     }
 
@@ -745,7 +746,7 @@
     function update_profile() {
       var form_data = new FormData();
       form_data.append("name", $("#nameInput").val());
-      form_data.append("phonenumber", $("#phoneInput").val());
+      form_data.append("phone", $("#phoneInput").val());
       form_data.append("latitude", $("#latInput").val());
       form_data.append("longitude", $("#lngInput").val());
       form_data.append("type", "profile");
@@ -759,7 +760,7 @@
           }
           var keys = [
             "name",
-            "phonenumber",
+            "phone",
             "latitude",
             "longitude"
           ]

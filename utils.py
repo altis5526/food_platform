@@ -1,5 +1,6 @@
 
 from flask_sqlalchemy import SQLAlchemy
+from geoalchemy2 import Geometry
 import re
 
 db = SQLAlchemy()
@@ -25,6 +26,8 @@ class user_(db.Model):
     phone = db.Column(db.NUMERIC(10, 0))
     lat = db.Column(db.NUMERIC(10, 8))
     lng = db.Column(db.NUMERIC(11, 8))
+    # position = db.Column(Geometry('POINT'))
+    position = db.Column(db.String(256))
     balance = db.Column(db.NUMERIC(20, 0))
 
     def __init__(self, UID, account, name, password, phone, lat, lng, balance):
@@ -36,7 +39,7 @@ class user_(db.Model):
         self.lat = lat
         self.lng = lng
         self.balance = balance
-
+        self.position = 'POINT({} {})'.format(lat, lng)
 
 """
 create table shop (
@@ -55,18 +58,22 @@ class shop_(db.Model):
     SID = db.Column(db.Integer, primary_key = True)
     UID = db.Column(db.Integer)
     shop_name = db.Column(db.String(64))
+    lat = db.Column(db.NUMERIC(10, 8))
     lng = db.Column(db.NUMERIC(11, 8))
+    # position = db.Column(Geometry('POINT'))
+    position = db.Column(db.String(256))
     phone = db.Column(db.NUMERIC(10, 0))
     type = db.Column(db.String(256))
 
     def __init__(self, SID, UID, shop_name, lat, lng, phone, type):
         self.SID = SID
         self.UID = UID
-        self.shop_name = shop_name
         self.lat = lat
         self.lng = lng
-        self.phone = phone
         self.type = type
+        self.phone = phone
+        self.shop_name = shop_name
+        self.position = 'POINT({} {})'.format(lat, lng)
 
 
 """
