@@ -55,7 +55,6 @@ class shop_(db.Model):
     SID = db.Column(db.Integer, primary_key = True)
     UID = db.Column(db.Integer)
     shop_name = db.Column(db.String(64))
-    lat = db.Column(db.NUMERIC(10, 8))
     lng = db.Column(db.NUMERIC(11, 8))
     phone = db.Column(db.NUMERIC(10, 0))
     type = db.Column(db.String(256))
@@ -88,7 +87,7 @@ class item_(db.Model):
     item_name = db.Column(db.String(256))
     price = db.Column(db.NUMERIC(20, 0))
     content = db.Column(db.LargeBinary)
-    amount = db.Column(db.Integer())
+    amount = db.Column(db.Integer)
 
     def __init__(self, PID, SID, item_name, price, content, amount):
         self.PID = PID
