@@ -192,7 +192,7 @@
               <span style="color:red" id="shop_shop_name_error"> </span>
             </div>
             <div class="col-xs-2">
-              <label for="food_category">shop category</label>
+              <label for="food_category">food category</label>
               <input class="form-control" id="food_category" value="{{info['shop']['food_category']}}" type="text">
               <span style="color:red" id="food_category_error"> </span>
             </div>
@@ -222,7 +222,7 @@
               <span style="color:red" id="shop_shop_name_error"> </span>
             </div>
             <div class="col-xs-2">
-              <label for="food_category">shop category</label>
+              <label for="food_category">food category</label>
               <input class="form-control" id="food_category" placeholder="food category" type="text">
               <span style="color:red" id="food_category_error"> </span>
             </div>
@@ -655,7 +655,38 @@
     }
     
     function addShop() {
-      alert("Not implemented... ");
+      var form_data = new FormData();
+      form_data.append("shop_name", $("#shop_name").val());
+      form_data.append("food_category", $("#food_category").val());
+      form_data.append("latitude", $("#shop_latitude").val());
+      form_data.append("longitude", $("#shop_longitude").val());
+      form_data.append("type", "addShop");
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('Successful Registration!');
+            window.location.replace('/nav');
+          }
+          else {
+            var keys = [
+              "shop_name",
+              "food_category",
+              "latitude",
+              "longitude"
+            ];
+            for (let key in keys) {
+              let errorName = "#shop_" + keys[key] + "_error";
+              $(errorName).text(data[keys[key]]);
+            }
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
     }
 
     function updShop() {

@@ -259,13 +259,13 @@ def checkEmptyAndValue(message, keys):
         ret.update({key: ''})
     # Check empty
     for key in keys:
-        if key not in message.keys() or len(message[key]) == 0 and key in empty_message.keys():
+        if (key not in message.keys() or len(message[key]) == 0) and key in empty_message.keys():
             ret.update({key: empty_message[key]})
             ret.update({'success': False})
 
     # check value
     for key in keys:
-        if ret[key] == '' and not Patterns[key](message[key]) :
+        if ret[key] == '' and key in Patterns.keys() and not Patterns[key](message[key]) :
             ret.update({key: error_message[key]})
             ret.update({'success': False})
 

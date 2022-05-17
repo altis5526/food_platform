@@ -76,13 +76,13 @@
 						</div>
 						<div class="form-group">
 							<label for="name" class="sr-only">phonenumber</label>
-							<input type="text" name="phonenumber" class="form-control" id="phonenumber" placeholder="PhoneNumber" autocomplete="off">
-							<span style="color:red" id="phonenumber_error"> </span>
+							<input type="text" name="phonenumber" class="form-control" id="phone" placeholder="PhoneNumber" autocomplete="off">
+							<span style="color:red" id="phone_error"> </span>
 						</div>
 						<div class="form-group">
 							<label for="Account" class="sr-only">Account</label>
-							<input type="text" name="account" class="form-control" id="Account" placeholder="Account" autocomplete="off">
-							<span style="color:red" id="Account_error"> </span>
+							<input type="text" name="account" class="form-control" id="account" placeholder="Account" autocomplete="off">
+							<span style="color:red" id="account_error"> </span>
 						</div>
 						<div class="form-group">
 							<label for="password" class="sr-only">Password</label>
@@ -109,7 +109,7 @@
 							<p>Already registered? <a href="login">Sign In</a></p>
 						</div>
 						<div class="form-group">
-							<input onclick="sent()" type="button" value="Sign Up" class="btn btn-primary">
+							<input onclick="send()" type="button" value="Sign Up" class="btn btn-primary">
 						</div>
 						
 					</form>
@@ -123,11 +123,11 @@
 		</div>
 	
 	<script>
-		function sent() {
+		function send() {
 			var form_data = new FormData();
 			form_data.append("name", $("#name").val());
-			form_data.append("phonenumber", $("#phonenumber").val());
-			form_data.append("Account", $("#Account").val());
+			form_data.append("phone", $("#phone").val());
+			form_data.append("account", $("#account").val());
 			form_data.append("password", $("#password").val());
 			form_data.append("re-password", $("#re-password").val());
 			form_data.append("latitude", $("#latitude").val());
@@ -144,14 +144,13 @@
 					else {
 						var keys = [
 							"name", 
-							"phonenumber",
-							"Account",
+							"phone",
+							"account",
 							"password",
 							"re-password",
 							"latitude",
 							"longitude"
 						];
-						
 						for (let key in keys) {
 							let errorName = '#' + keys[key] + "_error";
 							$(errorName).text(data[keys[key]])

@@ -130,21 +130,46 @@ def update():
         return jsonify({'success': True, 'value': str(data.balance)})
 
     if message['type'] == 'addShop':
-        pass
+        print('add shop for user: ', message)
+        keys = ['shop_name', 'food_category', 'latitude', 'longitude']        
+
+        ret = checkEmptyAndValue(message, keys)
+
+        # check duplicates
+        if 'shop_name' in message.keys() and len(message['shop_name']) != 0:
+            shopInfo = db.session.query(shop_).filter(shop_.shop_name == message['shop_name']).first()
+            print(shopInfo)
+            if (shopInfo != None):
+                ret.update({'shop_name': 'This shop name is already registered!!'})
+                ret.update({'success': False})
+
+        if ret['success']:
+            user_id = session.get('_user_id')
+
+            newshop = shop_(None, 
+                         user_id,
+                         message['shop_name'], 
+                         message['latitude'],
+                         message['longitude'],
+                         '0979797979',
+                         message['food_category'])
+            
+            db.session.add(newshop)
+            db.session.commit()
+
+
+        return jsonify(ret)
 
     if message['type'] == 'updShop':
         print('update shop for user: ', message)
         keys = ['shop_name', 'food_category', 'latitude', 'longitude']        
-        ret = {'success': True}
-        for key in keys :
-            ret.update({key: ''})
 
         ret = checkEmptyAndValue(message, keys)
 
         userID = session.get('_user_id')
 
         # check duplicate
-        if ret['success']:
+        if 'shop_name' in message.keys() and len(message['shop_name']) != 0:
             shopInfo = db.session.query(shop_).filter(shop_.shop_name == message['shop_name']).first()
             print(shopInfo)
             if (shopInfo != None) and int(shopInfo.UID) != int(userID):
@@ -418,6 +443,7 @@ def signup():
 
     if request.method == 'POST':
         message = request.form
+        print(message)
         keys = ['name', 'phone', 'account', 'password', 're-password', 'latitude', 'longitude']
         
         ret = checkEmptyAndValue(message, keys)
@@ -442,7 +468,8 @@ def signup():
                          message['password'],
                          message['phone'],
                          message['latitude'],
-                         message['longitude'])
+                         message['longitude'],
+                         0)
             
             db.session.add(newuser)
             db.session.commit()
