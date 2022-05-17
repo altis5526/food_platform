@@ -536,8 +536,10 @@
         data: form_data,
         success: (data) => {
           shopTable = $("#shopTable").DataTable({
-            "search": false,
+            "searching": false,
             "autoWidth": true,
+            "lengthMenu": [5, 10, 20, 50],
+            "pageLength": 5,
             "columns": [{
                 data: "shop_name",
                 title: "shop name"
@@ -556,7 +558,7 @@
                   return '<button onclick="loadItemModal(\'' + data['SID'] +
                     '\')" type="button" class="btn btn-info " data-toggle="modal" data-target="#orderModal">Openmenu</button>';
                 },
-                "orderable": false
+                "sortable": false
               }
             ],
             "data": data['data']
