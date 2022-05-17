@@ -1,8 +1,11 @@
 import json
+from unicodedata import category
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
 from flask import Flask,render_template, request, flash, session, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_, and_
 from functools import wraps
+from numpy import Inf
 from utils import * 
 import base64
 
@@ -123,34 +126,7 @@ def update():
         return jsonify({'success': True, 'value': str(data.balance)})
 
     if message['type'] == 'addShop':
-        print('register shop for user: ', message)
-        keys = ['shop_name', 'food_category', 'latitude', 'longitude']        
-        
-        ret = checkEmptyAndValue(message, keys)
-        
-        # check duplicate
-        shopInfo = db.session.query(shop_).filter(shop_.shop_name == message['shop_name']).first()
-        if shopInfo != None:
-            ret.update({'shop_name': 'This shop name is already registered!!'})
-            ret.update({'success': False})
-
-        if ret['success'] :
-            
-            userID = session.get('_user_id')
-
-            newShop = shop_(None, 
-                            userID,
-                            message['shop_name'],
-                            message['latitude'],
-                            message['longitude'],
-                            '1234567890', # not implemented yet...
-                            message['food_category'])
-            
-
-            db.session.add(newShop)
-            db.session.commit()
-
-        return jsonify(ret)
+        pass
 
     if message['type'] == 'updShop':
         print('update shop for user: ', message)
@@ -256,6 +232,29 @@ def ask():
     message = request.form
     if message['type'] == 'findShop' :
         print('Searching for: ', message)
+
+        shopNames = message['shopName'].split()
+        categorys = message['category'].split() # shop type
+        distance = 1000000000000000 if not isFloat(message['distance']) else float(message['distance'])
+                
+        rule = and_(
+            *[shop_.shop_name.like('%' + shopName + '%') for shopName in shopNames], 
+            *[shop_.type.like('%' + cat + '%') for cat in categorys], 
+            True if distance is None else  shop_.lat < distance
+        )
+        
+        # First select SID with filter on distance, type, and shopName
+        shops = db.session.query(shop_.SID).filter(rule).all() 
+        
+
+        # Use the SID to select the 
+        meals = message['meal'].split()
+        lowerPrice = None if not isInteger(message['lowerPrice']) else int(message['lowerPrice'])
+        upperPrice = None if not isInteger(message['upperPrice']) else int(message['upperPrice'])
+
+        
+
+        print(shops)
         ret = {'success': False}
         ret.update({'shop': []})
         # ret['shop'].append()
@@ -314,7 +313,6 @@ def nav():
         print('This user has no shop.')
         info.update({'hasShop': False})
     
-
     return render_template('nav.html', info = info)
 
 

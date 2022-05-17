@@ -10,7 +10,10 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.12.0/css/jquery.dataTables.min.css">
+  <script src="https://cdn.datatables.net/1.12.0/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.12.0/js/dataTables.bootstrap4.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <title>Uber Panda</title>
@@ -434,7 +437,7 @@
 
                 </datalist>
               </div>
-              <button onclick="search()" style="margin-left: 18px;" class="btn btn-primary">Search</button>
+              <button onclick="loadShopTable()" style="margin-left: 18px;" class="btn btn-primary">Search</button>
 
             </div>
           </form>
@@ -442,15 +445,13 @@
 
         <div class="row">
           <div class="  col-xs-8">
-            <table class="table" style=" margin-top: 15px;">
+            <table id="shopTable" class="table" style=" margin-top: 15px;">
               <thead>
                 <tr>
                   <th scope="col">#</th>
-
                   <th scope="col">shop name</th>
                   <th scope="col">shop category</th>
                   <th scope="col">Distance</th>
-
                 </tr>
               </thead>
               <tbody id="shopList">
@@ -468,8 +469,9 @@
                 </tr>
 
 
-              </tbody>
+              </tbody>         
             </table>
+
 
             <!-- Modal -->
             <div class="modal fade" id="macdonald" data-backdrop="static" tabindex="-1" role="dialog"
@@ -553,22 +555,21 @@
             </div>
 
 
-
-
           </div>
 
         </div>
 
-
-
-
-
-
-
-
+        <div class="row">
+          <div class=" col-xs-8">
+            <table id="testTable" class="table" style=" margin-top: 15px;">
+              <tr>
+                <th>A</th>
+                <th>B</th>
+              </tr>
+            </table>
+          </div>
+        </div>
       </div>
-
-
     </div>
   </div>
 
@@ -579,44 +580,45 @@
       $(".nav-tabs a").click(function () {
         $(this).tab('show');
       });
+      loadShopTable();
     });
+
+    function loadShopTable() {
+      var form_data = new FormData();
+      form_data.append("shopName", $("#shopNameInput").val());
+      form_data.append("lowerPrice", $("#lowerPriceInput").val());
+      form_data.append("upperPrice", $("#upperPriceInput").val());
+      form_data.append("meal", $("#mealInput").val());
+      form_data.append("distance", $("#distanceInput").val());
+      form_data.append("category", $("#categoryInput").val());
+      form_data.append("type", "findShop");
+      $.ajax({
+        type: "POST",
+        url: "/ask",
+        data: form_data,
+        success: (data) => {
+
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+
+      $("#testTable").DataTable({
+        "ajax": {
+          url: "/ask",
+          type: "POST"
+        },
+        "data": [['a', 'b'], ['c', 'd']]
+      });
+    }
 
     function sendOrder() {
       alert("nothing will be sent....");
     }
 
     function addShop() {
-      var form_data = new FormData();
-      form_data.append("shop_name", $("#shop_name").val());
-      form_data.append("food_category", $("#food_category").val());
-      form_data.append("latitude", $("#shop_latitude").val());
-      form_data.append("longitude", $("#shop_longitude").val());
-      form_data.append("type", "addShop");
-      $.ajax({
-        type: "POST",
-        url: '/update',
-        data: form_data,
-        success: (data) => {
-          if (data.success) {
-            alert('Successfully registered a shop!!!');
-            window.location.replace('/nav');
-          } else {
-            var keys = [
-              "shop_name",
-              "food_category",
-              "latitude",
-              "longitude"
-            ];
-            for (let key in keys) {
-              let errorName = "#shop_" + keys[key] + "_error";
-              $(errorName).text(data[keys[key]]);
-            }
-          }
-        },
-        contentType: false,
-        processData: false,
-        dataType: "json"
-      });
+      alert("Not implemented... ");
     }
 
     function updShop() {
@@ -738,28 +740,6 @@
         dataType: "json"
       });
 
-    }
-
-    function search() {
-      var form_data = new FormData();
-      form_data.append("shopName", $("#shopNameInput").val());
-      form_data.append("lowerPrice", $("#lowerPriceInput").val());
-      form_data.append("upperPrice", $("#upperPriceInput").val());
-      form_data.append("meal", $("#mealInput").val());
-      form_data.append("distance", $("#distanceInput").val());
-      form_data.append("category", $("#categoryInput").val());
-      form_data.append("type", "findShop");
-      $.ajax({
-        type: "POST",
-        url: "/ask",
-        data: form_data,
-        success: (data) => {
-
-        },
-        contentType: false,
-        processData: false,
-        dataType: "json"
-      });
     }
 
     function update_profile() {
