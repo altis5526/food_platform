@@ -1,4 +1,5 @@
 import json
+from sre_constants import SUCCESS
 from unicodedata import category
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
 from flask import Flask,render_template, request, flash, session, redirect, url_for, jsonify, send_file
@@ -76,6 +77,7 @@ def login():
 @login_required
 def update():
     message = request.form
+
     if message['type'] == 'password' :
         print('update user password: ', message)
         userID = session.get('_user_id')
@@ -229,18 +231,28 @@ def update():
         else :
             return jsonify({'success': False})
 
+    if message['type'] == 'order':
+        print('User send order: ', message)
+        PIDS = message['order'].split(',')
+        
+        for PID in PIDS :
+            if isInteger(PID) :
+                pass # Not implemented yet...
+        return jsonify({'success': True})
+        
+
 @app.route('/ask', methods = ['POST'])
 @login_required
 def ask():
     message = request.form
-    print('WTF---->', message)
     if message['type'] == 'findShop' :
         print('Searching for: ', message)
 
         shopNames = message['shopName'].split()
         categorys = message['category'].split() # shop type
-        distance = 1000000000000000 if not isFloat(message['distance']) else float(message['distance'])
-        
+        distanceType = {"near": 1000, "medium": 10000, "far": 1000000} # Distance type
+        distance = 1000000000000000 if message['distance'] not in distanceType.keys() else distanceType[message['distance']]
+    
         meals = message['meal'].split()
         lowerPrice = None if not isInteger(message['lowerPrice']) else int(message['lowerPrice'])
         upperPrice = None if not isInteger(message['upperPrice']) else int(message['upperPrice'])
@@ -257,8 +269,8 @@ def ask():
             # select with constrain on shop
             
             rule1 = and_(
-                *[shop_.shop_name.like('%' + shopName + '%') for shopName in shopNames], 
-                *[shop_.type.like('%' + cat + '%') for cat in categorys], 
+                *[func.UPPER(shop_.shop_name).like(func.UPPER('%' + shopName + '%')) for shopName in shopNames], 
+                *[func.UPPER(shop_.type).like(func.UPPER('%' + cat + '%')) for cat in categorys], 
                 True if distance is None else  func.ST_Distance_Sphere(func.ST_GeomFromText(shop_.position), func.ST_GeomFromText(userPos)) < distance
             )
             # First select SID with filter on distance, type, and shopName
@@ -266,16 +278,22 @@ def ask():
 
             
             # select with constrain on item
+            
+            SIDS = []
+            for shop in shops1 :
+                SIDS.append(shop[0])
             rule2 = and_(
-                item_.SID.in_(shops1),
-                *[item_.item_name.like('%' + item_name + '%') for item_name in meals],
+                item_.SID.in_(SIDS),
+                *[func.UPPER(item_.item_name).like(func.UPPER('%' + item_name + '%')) for item_name in meals] ,
                 True if lowerPrice is None else item_.price >= lowerPrice,
                 True if upperPrice is None else item_.price <= upperPrice,
             )
-        
-            shops2 = db.session.query(item_.SID).filter(rule2).all()
-
-            result = db.session.query(shop_, func.ST_Distance_Sphere(func.ST_GeomFromText(shop_.position), func.ST_GeomFromText(userPos))).filter(shop_.SID.in_(shops2))
+            
+            shops2 = db.session.query(item_.SID).distinct().filter(rule2).all()
+            SIDS = []
+            for shop in shops2 :
+                SIDS.append(shop[0])
+            result = db.session.query(shop_, func.ST_Distance_Sphere(func.ST_GeomFromText(shop_.position), func.ST_GeomFromText(userPos))).filter(shop_.SID.in_(SIDS)).all()
             """
             with shop2 as (
                 with shop1 as (
@@ -290,8 +308,8 @@ def ask():
         else :
 
             rule1 = and_(
-                *[shop_.shop_name.like('%' + shopName + '%') for shopName in shopNames], 
-                *[shop_.type.like('%' + cat + '%') for cat in categorys], 
+                *[func.UPPER(shop_.shop_name).like(func.UPPER('%' + shopName + '%')) for shopName in shopNames], 
+                *[func.UPPER(shop_.type).like(func.UPPER('%' + cat + '%')) for cat in categorys], 
                 True if distance is None else  func.ST_Distance_Sphere(func.ST_GeomFromText(shop_.position), func.ST_GeomFromText(userPos)) < distance
             )
             result = db.session.query(shop_, func.ST_Distance_Sphere(func.ST_GeomFromText(shop_.position), func.ST_GeomFromText(userPos))).filter(rule1).all() 
@@ -302,15 +320,6 @@ def ask():
             )
             select * from shop where SID in shop1.SID
             """
-        
-        """
-        ,
-          "data": [
-            {"shop_name": "fk", "category": "fkkkkk", "distance": "aliens"}
-          ]
-        """
-        
-
         def getDis(d):
             label = ['near', 'medium']
             value = [30000, 150000]    
@@ -326,13 +335,28 @@ def ask():
             ret['data'].append({
                 'shop_name': shop[0].shop_name,
                 'category': shop[0].type,
-                'distance': getDis(shop[1])
+                'distance': getDis(shop[1]),
+                'SID': shop[0].SID
             })
         print(ret)
         return jsonify(ret)
 
+    if message['type'] == 'findItem' :
+        print('Asking Items for: ', message)
+        items = db.session.query(item_).filter(item_.SID == message['SID']).all()
+
+        ret = {'success': False, 'data': []} 
+        for item in items :
+            ret['data'].append({
+                'content': base64.b64encode(item.content).decode(), 
+                'name': item.item_name,
+                'price': int(item.price),
+                'amount': int(item.amount),
+                'PID': item.PID
+            })
 
 
+        return jsonify(ret)
         
 @app.route('/nav', methods = ['GET'])
 @login_required

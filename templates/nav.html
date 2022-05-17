@@ -14,7 +14,7 @@
   <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  
+
   <!-- DataTable -->
 
 
@@ -25,8 +25,8 @@
 
   <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.12.0/css/jquery.dataTables.min.css">
-  
-  
+
+
   <title>Uber Panda</title>
   <style>
     .navbar-header-left {
@@ -35,7 +35,6 @@
       border: 1px solid #000;
       float: left
     }
-    
   </style>
 </head>
 
@@ -60,13 +59,6 @@
     </ul>
 
     <div class="tab-content">
-
-
-
-
-
-
-
 
 
       <div id="profile" class="tab-pane fade">
@@ -457,119 +449,44 @@
 
         <div class="row">
           <div class="  col-xs-8">
-            <table id="shopTable" class="display" style=" margin-top: 15px; width:100%;">
-              <!-- <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">shop name</th>
-                  <th scope="col">shop category</th>
-                  <th scope="col">Distance</th>
-                </tr>
-              </thead> -->
-              <!-- <tbody id="shopList">
-                <tr>
-                  <th scope="row">1</th>
-
-                  <td>macdonald</td>
-                  <td>fast food</td>
-
-                  <td>near </td>
-                  <td> <button type="button" class="btn btn-info " data-toggle="modal" data-target="#macdonald">Open
-                      menu</button>
-                  </td>
-
-                </tr>
+            <table id="shopTable" class="display" style=" margin-top: 15px; width:100%;"></table>
+          </div>
+        </div>
 
 
-              </tbody>          -->
-            </table>
 
+        <!-- Modal -->
+        <div class="modal fade" id="orderModal" data-backdrop="static" tabindex="-1" role="dialog"
+          aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">menu</h4>
+              </div>
+              <div class="modal-body">
 
-            <!-- Modal -->
-            <div class="modal fade" id="macdonald" data-backdrop="static" tabindex="-1" role="dialog"
-              aria-labelledby="staticBackdropLabel" aria-hidden="true">
-              <div class="modal-dialog">
-
-                <!-- Modal content-->
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">menu</h4>
+                <!--  -->
+                <div class="row">
+                  <div class="  col-xs-12">
+                    <table id="orderTable" class="table" style=" margin-top: 15px;"></table>
                   </div>
-                  <div class="modal-body">
-                    <!--  -->
 
-                    <div class="row">
-                      <div class="  col-xs-12">
-                        <table class="table" style=" margin-top: 15px;">
-                          <thead>
-                            <tr>
-                              <th scope="col">#</th>
-                              <th scope="col">Picture</th>
-
-                              <th scope="col">meal name</th>
-
-                              <th scope="col">price</th>
-                              <th scope="col">Quantity</th>
-
-                              <th scope="col">Order check</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-
-                            <tr>
-                              <th scope="row">1</th>
-                              <td><img src="Picture/1.jpg" with="50" heigh="10" alt="Hamburger"></td>
-
-                              <td>Hamburger</td>
-
-                              <td>80 </td>
-                              <td>20 </td>
-
-                              <td> <input type="checkbox" id="cbox1" value="Hamburger"></td>
-                            </tr>
-                            <tr>
-                              <th scope="row">2</th>
-                              <td><img src="Picture/2.jpg" with="10" heigh="10" alt="coffee"></td>
-
-                              <td>coffee</td>
-
-                              <td>50 </td>
-                              <td>20</td>
-
-                              <td><input type="checkbox" id="cbox2" value="coffee"></td>
-                            </tr>
-
-
-
-
-
-
-
-
-
-                          </tbody>
-                        </table>
-                      </div>
-
-                    </div>
-
-
-                    <!--  -->
-                  </div>
-                  <div class="modal-footer">
-                    <button onclick="sendOrder()" type="button" class="btn btn-default"
-                      data-dismiss="modal">Order</button>
-                  </div>
                 </div>
+                <!--  -->
 
+              </div>
+              <div class="modal-footer">
+                <button onclick="sendOrder()" type="button" class="btn btn-default" data-dismiss="modal">Order</button>
               </div>
             </div>
 
-
           </div>
-
         </div>
+
+
+
       </div>
     </div>
   </div>
@@ -577,9 +494,34 @@
   <!-- Option 1: Bootstrap Bundle with Popper -->
   <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
   <script>
-    var shopTable;
+    var shopTable, itemTable, orderList;
+
+    function loadItemModal(x) {
+      orderList = {};
+      var form_data = new FormData();
+      form_data.append("type", "findItem");
+      form_data.append("SID", x);
+      $.ajax({
+        type: "POST",
+        url: "/ask",
+        data: form_data,
+        success: (data) => {
+          orderTable.clear().draw();
+          orderTable.rows.add(data['data']).draw();
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
     function loadShopTable() {
-      var dist = {"":"", "near": "1000", "medium": 10000, "far": 1000000}
+      var dist = {
+        "": "",
+        "near": "1000",
+        "medium": 10000,
+        "far": 1000000
+      }
       var form_data = new FormData();
       form_data.append("shopName", $("#shopNameInput").val());
       form_data.append("lowerPrice", $("#lowerPriceInput").val());
@@ -596,13 +538,23 @@
           shopTable = $("#shopTable").DataTable({
             "search": false,
             "autoWidth": true,
-            "columns": [
-              {data: "shop_name", title: "shop name"},
-              {data: "category", title: "shop category"},
-              {data: "distance", title: "Distance"},
-              {data: null, 
-                render: function(data, type, row) {           
-                  return '<button type="button" class="btn btn-info " data-toggle="modal" data-target="#macdonald">Openmenu</button>'
+            "columns": [{
+                data: "shop_name",
+                title: "shop name"
+              },
+              {
+                data: "category",
+                title: "shop category"
+              },
+              {
+                data: "distance",
+                title: "Distance"
+              },
+              {
+                data: null,
+                render: function (data, type, row) {
+                  return '<button onclick="loadItemModal(\'' + data['SID'] +
+                    '\')" type="button" class="btn btn-info " data-toggle="modal" data-target="#orderModal">Openmenu</button>';
                 },
                 "orderable": false
               }
@@ -615,20 +567,47 @@
         dataType: "json"
       });
     }
+
+    function addItemToList(value, x) {
+      orderList[x] = value.checked;
+    }
+
     $(document).ready(function () {
       $(".nav-tabs a").click(function () {
         $(this).tab('show');
       });
+      orderTable = $("#orderTable").DataTable({
+        "searching": false,
+        "orderable": false,
+        "lengthMenu": [5, 10, 20],
+        "pageLength": 5,
+        "info": false,
+        "columns": [
+          // {data: null, title: "#", render: function(data, type, row) {
+          //   // return row.rows + 1;
+          //   console.log(type)
+          //   return 1;
+          // }},
+          {data: "content", title: "Picture", render: function(data, type, row){
+            return '<img src="data:image/jpeg;base64,' + data +  '" width="50" height="50">';
+          }, "sortable": false},
+          {data: "name", title: "meal name"},
+          {data: "price", title: "price"},
+          {data: "amount", title: "Quantity"},
+          {data: "PID", title: "Order check", render: function(data, type, full, meta){
+            return '<input onchange="addItemToList(this, ' + data + ')" type="checkbox" id="item_' + data + '">'
+          }, "sortable": false}
+        ]
+      });
       loadShopTable();
     });
     function reloadShopTable() {
-      var dist = {"":"", "near": 1000, "medium": 10000, "far": 1000000}
       var form_data = new FormData();
       form_data.append("shopName", $("#shopNameInput").val());
       form_data.append("lowerPrice", $("#lowerPriceInput").val());
       form_data.append("upperPrice", $("#upperPriceInput").val());
       form_data.append("meal", $("#mealInput").val());
-      form_data.append("distance", dist[$("#distanceInput").val()]);
+      form_data.append("distance", $("#distanceInput").val());
       form_data.append("category", $("#categoryInput").val());
       form_data.append("type", "findShop");
       $.ajax({
@@ -644,12 +623,39 @@
         dataType: "json"
       });
     }
+
     function sendOrder() {
-      alert("nothing will be sent....");
+      sendOrderList = []
+      for (const [key, value] of Object.entries(orderList)) {
+        if(value) {
+          sendOrderList.push(key);
+        }
+      }
+      if(sendOrderList.length == 0) {
+        alert("Your order list is empty...");
+      }
+      else {
+        form_data = new FormData();
+        form_data.append("type", "order");
+        form_data.append("order", sendOrderList);
+        $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          alert("I already send the order, but I want send anything to your. Ha!~ Ha!~");
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+      }
     }
+    
     function addShop() {
       alert("Not implemented... ");
     }
+
     function updShop() {
       var form_data = new FormData();
       form_data.append("shop_name", $("#shop_name").val());
