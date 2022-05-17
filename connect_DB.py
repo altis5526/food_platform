@@ -233,6 +233,7 @@ def update():
 @login_required
 def ask():
     message = request.form
+    print('WTF---->', message)
     if message['type'] == 'findShop' :
         print('Searching for: ', message)
 
@@ -274,7 +275,7 @@ def ask():
         
             shops2 = db.session.query(item_.SID).filter(rule2).all()
 
-            result = db.session.query(shop_).filter(shop_.SID.in_(shops2))
+            result = db.session.query(shop_, func.ST_Distance_Sphere(func.ST_GeomFromText(shop_.position), func.ST_GeomFromText(userPos))).filter(shop_.SID.in_(shops2))
             """
             with shop2 as (
                 with shop1 as (
@@ -293,7 +294,7 @@ def ask():
                 *[shop_.type.like('%' + cat + '%') for cat in categorys], 
                 True if distance is None else  func.ST_Distance_Sphere(func.ST_GeomFromText(shop_.position), func.ST_GeomFromText(userPos)) < distance
             )
-            result = db.session.query(shop_).filter(rule1).all() 
+            result = db.session.query(shop_, func.ST_Distance_Sphere(func.ST_GeomFromText(shop_.position), func.ST_GeomFromText(userPos))).filter(rule1).all() 
 
             """
             with shop1 as (
@@ -301,12 +302,26 @@ def ask():
             )
             select * from shop where SID in shop1.SID
             """
+        
+        """
+        ,
+          "data": [
+            {"shop_name": "fk", "category": "fkkkkk", "distance": "aliens"}
+          ]
+        """
+        
 
         print('Searching result: ', result)
         ret = {'success': False}
-        ret.update({'shop': []})
-        # ret['shop'].append()
-        return jsonify({})
+        ret.update({'data': []})
+        for shop in result:
+            ret['data'].append({
+                'shop_name': shop[0].shop_name,
+                'category': shop[0].type,
+                'distance': ''
+            })
+        print(ret)
+        return jsonify(ret)
 
 
 
