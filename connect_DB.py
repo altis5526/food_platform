@@ -311,6 +311,14 @@ def ask():
         """
         
 
+        def getDis(d):
+            label = ['near', 'medium']
+            value = [30000, 150000]    
+            for i in range(len(label)) :
+                if(d <= value[i]):
+                    return label[i]
+            return 'far'
+
         print('Searching result: ', result)
         ret = {'success': False}
         ret.update({'data': []})
@@ -318,7 +326,7 @@ def ask():
             ret['data'].append({
                 'shop_name': shop[0].shop_name,
                 'category': shop[0].type,
-                'distance': ''
+                'distance': getDis(shop[1])
             })
         print(ret)
         return jsonify(ret)

@@ -457,7 +457,7 @@
 
         <div class="row">
           <div class="  col-xs-8">
-            <table id="shopTable" class="table" style=" margin-top: 15px;">
+            <table id="shopTable" class="display" style=" margin-top: 15px; width:100%;">
               <!-- <thead>
                 <tr>
                   <th scope="col">#</th>
@@ -577,7 +577,7 @@
   <!-- Option 1: Bootstrap Bundle with Popper -->
   <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
   <script>
-    var shopList;
+    var shopTable;
     function loadShopTable() {
       var dist = {"":"", "near": "1000", "medium": 10000, "far": 1000000}
       var form_data = new FormData();
@@ -593,10 +593,9 @@
         url: "/ask",
         data: form_data,
         success: (data) => {
-          shopList = data['data'];
-          $("#shopTable").DataTable({
+          shopTable = $("#shopTable").DataTable({
             "search": false,
-
+            "autoWidth": true,
             "columns": [
               {data: "shop_name", title: "shop name"},
               {data: "category", title: "shop category"},
@@ -604,10 +603,11 @@
               {data: null, 
                 render: function(data, type, row) {           
                   return '<button type="button" class="btn btn-info " data-toggle="modal" data-target="#macdonald">Openmenu</button>'
-                }
+                },
+                "orderable": false
               }
             ],
-            "data": shopList
+            "data": data['data']
           })
         },
         contentType: false,
@@ -622,7 +622,7 @@
       loadShopTable();
     });
     function reloadShopTable() {
-      var dist = {"":"", "near": "1000", "medium": 10000, "far": 1000000}
+      var dist = {"":"", "near": 1000, "medium": 10000, "far": 1000000}
       var form_data = new FormData();
       form_data.append("shopName", $("#shopNameInput").val());
       form_data.append("lowerPrice", $("#lowerPriceInput").val());
@@ -636,14 +636,13 @@
         url: "/ask",
         data: form_data,
         success: (data) => {
-          shopList = data['data']
+          shopTable.clear().draw();
+          shopTable.rows.add(data['data']).draw();
         },
         contentType: false,
         processData: false,
         dataType: "json"
       });
-      alert('reload table');
-      $("#ShopTable").reload()
     }
     function sendOrder() {
       alert("nothing will be sent....");
