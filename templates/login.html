@@ -7,7 +7,7 @@
 	<head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Minimal and Clean Sign up / Login and Forgot Form by FreeHTML5.co</title>
+	<title>Login</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Free HTML5 Template by FreeHTML5.co" />
 	<meta name="keywords" content="free html5, free template, free bootstrap, html5, css3, mobile first, responsive" />
@@ -40,7 +40,7 @@
 
 	<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 	<link rel="shortcut icon" href="favicon.ico">
-
+	<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script>
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300' rel='stylesheet' type='text/css'>
 	
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"> 
@@ -57,20 +57,13 @@
 
 	</head>
 	<body>
-		{% for message in get_flashed_messages() %}
-			<script>
-			alert('{{ message }}');
-			</script>
-		{% endfor %}
-		
 		<div class="container">
-
 			<div class="row">
 				<div class="col-md-4 col-md-offset-4">
-					
+				
 
 					<!-- Start Sign In Form -->
-					<form method="post" action="/login" class="fh5co-form animate-box" data-animate-effect="fadeIn">
+					<form class="fh5co-form animate-box" data-animate-effect="fadeIn">
 						<h2>Sign In</h2>
 						<div class="form-group">
 							<label for="account" class="sr-only">Account</label>
@@ -85,7 +78,7 @@
 							<p>Not registered? <a href="sign-up">Sign Up</a> </p>
 						</div>
 						<div class="form-group">
-							<input type="submit" value="Sign In" class="btn btn-primary">
+							<input onclick="send()" type="button" value="Sign In" class="btn btn-primary">
 						</div>
 					</form>
 					<!-- END Sign In Form -->
@@ -108,9 +101,32 @@
 	<!-- Main JS -->
 	<script src="{{ url_for('static', filename='js/main.js') }}"></script> 
 
-
-
-
 	</body>
+	<script> 
+		function send() {
+			password = $("#password").val();
+			password = md5(password);
+			var form_data = new FormData();
+			console.log(password);
+			form_data.append("password", password);
+			form_data.append("account", $("#account").val());
+			$.ajax({
+				type: "POST",
+				url: '/login',
+				data: form_data,
+				success: (data) => {
+					if(data.success) {
+						window.location.replace('/nav?#home');
+					}
+					else {
+						alert("登入失敗");
+					}
+				},
+				contentType: false,
+				processData: false,
+				dataType: "json"
+			});
+		}
+	</script>
 </html>
 

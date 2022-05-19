@@ -7,7 +7,7 @@
 	<head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Minimal and Clean Sign up / Login and Forgot Form by FreeHTML5.co</title>
+	<title>Sign Up</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Free HTML5 Template by FreeHTML5.co" />
 	<meta name="keywords" content="free html5, free template, free bootstrap, html5, css3, mobile first, responsive" />
@@ -42,7 +42,7 @@
 	<link rel="shortcut icon" href="favicon.ico">
 
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300' rel='stylesheet' type='text/css'>
-	
+	<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"> 
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/animate.css') }}"> 
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> 
@@ -123,13 +123,20 @@
 		</div>
 	
 	<script>
+		function secret(input_string) {
+			return md5(input_string);
+		}
 		function send() {
+			password = $("#password").val();
+			repassword = $("#re-password").val();
+			password = secret(password);
+			repassword = secret(repassword);
 			var form_data = new FormData();
 			form_data.append("name", $("#name").val());
 			form_data.append("phone", $("#phone").val());
 			form_data.append("account", $("#account").val());
-			form_data.append("password", $("#password").val());
-			form_data.append("re-password", $("#re-password").val());
+			form_data.append("password", password);
+			form_data.append("re-password", repassword);
 			form_data.append("latitude", $("#latitude").val());
 			form_data.append("longitude", $("#longitude").val());
 			$.ajax({

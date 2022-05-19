@@ -6,7 +6,7 @@ from flask import Flask,render_template, request, flash, session, redirect, url_
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import *
 from functools import wraps
-from numpy import Inf
+import numpy as np
 from utils import * 
 import base64
 
@@ -50,6 +50,12 @@ def user_loader(ID):
 ## --------------------------------------- Web ------------------------------------------ ##
 
 @app.route('/')
+def home():
+    if session.get('_user_id') is None:
+        return redirect(url_for('login'))
+    else:
+        return redirect('/nav?#home')
+
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
     if request.method == 'GET':
@@ -68,10 +74,9 @@ def login():
             user = User()
             user.id = data.UID 
             login_user(user) 
-            return redirect(url_for('nav'))
+            return jsonify({'success': True})
         
-        flash("登入失敗")
-        return redirect(url_for('login'))
+        return jsonify({'success': False})
 
 @app.route('/update', methods = ['POST'])
 @login_required
@@ -354,7 +359,7 @@ def ask():
             return 'far'
 
         print('Searching result: ', result)
-        ret = {'success': False}
+        ret = {'success': True}
         ret.update({'data': []})
         for shop in result:
             ret['data'].append({
@@ -379,10 +384,11 @@ def ask():
                 'amount': int(item.amount),
                 'PID': item.PID
             })
-
-
         return jsonify(ret)
         
+
+
+
 @app.route('/nav', methods = ['GET'])
 @login_required
 def nav():
@@ -433,7 +439,14 @@ def nav():
         print('This user has no shop.')
         info.update({'hasShop': False})
     
-    return render_template('nav.html', info = info)
+    backgroundSet = [
+        '/static/images/Ayame.jpg',
+        '/static/images/ina.jpg',
+        '/static/images/fubuki.png',
+        '/static/images/mio.jpg'
+    ]
+    index = np.random.randint(len(backgroundSet))
+    return render_template('nav.html', info = info, myBackground = backgroundSet[index])
 
 
 @app.route('/sign-up', methods = ['GET', 'POST'])
