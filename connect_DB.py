@@ -467,10 +467,10 @@ def signup():
             ret.update({'success': False})
 
         # Check account exists
-        data = db.session.query(user_).filter(user_.account == message['name']).first()
+        data = db.session.query(user_).filter(user_.account == message['account']).first()
 
         if data != None :
-            ret.update({'name': 'The account already exists.'})
+            ret.update({'account': 'The account already exists.'})
             ret.update({'success': False})
 
         if ret['success'] :
