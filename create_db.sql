@@ -9,7 +9,8 @@ create table user (
    	phone DECIMAL(10, 0),
     lat DECIMAL(10, 8) NOT NULL CHECK(lat >= -90.0 and lat <= 90.0),
     lng DECIMAL(11, 8) NOT NULL CHECK(lat >= -180.0 and lat <= 180.0),
-    balance NUMERIC(20, 0) DEFAULT 0
+    balance NUMERIC(20, 0) DEFAULT 0,
+    position varchar(256) NOT NULL
 );
 
 create table shop (
@@ -20,7 +21,8 @@ create table shop (
     lng DECIMAL(11, 8) NOT NULL CHECK(lat >= -180.0 and lat <= 180.0),
     phone DECIMAL(10, 0) NOT NULL,
     type varchar(256) NOT NULL,
-    FOREIGN KEY (UID) REFERENCES user (UID)
+    FOREIGN KEY (UID) REFERENCES user (UID),
+     position varchar(256) NOT NULL
 );
 
 create table item (
@@ -28,7 +30,7 @@ create table item (
     SID INT NOT NULL, 
     item_name varchar(256) NOT NULL,
     price numeric(20, 0) NOT NULL CHECK(price >= 0),
-    content LONGBOLB NOT NULL,
+    content LONGBLOB NOT NULL,
     amount INT DEFAULT 0,
     FOREIGN KEY (SID) REFERENCES shop (SID)  
 );
