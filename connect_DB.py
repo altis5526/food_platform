@@ -1,6 +1,3 @@
-import json
-from sre_constants import SUCCESS
-from unicodedata import category
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
 from flask import Flask,render_template, request, flash, session, redirect, url_for, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
@@ -112,7 +109,8 @@ def update():
 
             data.lat = message['latitude']
             data.lng = message['longitude']
-            data.position = 'POINT({} {})'.format(message['latitude'], message['longitude'])
+            # data.position = 'POINT({} {})'.format(message['latitude'], message['longitude'])
+            data.position = 'POINT(%.6f %.6f)' % (float(message['longitude']), float(message['latitude']))
             print('success')
 
             db.session.commit()
@@ -190,7 +188,9 @@ def update():
             yourShop.type = message['food_category']
             yourShop.lat = message['latitude']
             yourShop.lng = message['longitude']
-            yourShop.position = 'POINT({} {})'.format(message['latitude'], message['longitude'])
+            # yourShop.position = 'POINT({} {})'.format(message['latitude'], message['longitude'])
+            yourShop.position = 'POINT(%.6f %.6f)' % (float(message['longitude']), float(message['latitude']))
+            print('FK')
 
             db.session.commit()
 
@@ -280,7 +280,7 @@ def ask():
 
         shopNames = message['shopName'].split()
         categorys = message['category'].split() # shop type
-        distanceType = {"near": 1000, "medium": 10000, "far": 1000000} # Distance type
+        distanceType = {"near": 30000, "medium": 150000, "far": 10000000000000} # Distance type
         distance = 1000000000000000 if message['distance'] not in distanceType.keys() else distanceType[message['distance']]
     
         meals = message['meal'].split()

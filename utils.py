@@ -26,7 +26,6 @@ class user_(db.Model):
     phone = db.Column(db.NUMERIC(10, 0))
     lat = db.Column(db.NUMERIC(10, 8))
     lng = db.Column(db.NUMERIC(11, 8))
-    # position = db.Column(Geometry('POINT'))
     position = db.Column(db.String(256))
     balance = db.Column(db.NUMERIC(20, 0))
 
@@ -39,7 +38,7 @@ class user_(db.Model):
         self.lat = lat
         self.lng = lng
         self.balance = balance
-        self.position = 'POINT({} {})'.format(lat, lng)
+        self.position = 'POINT(%.6f %.6f)' % (float(lng), float(lat))
 
 """
 create table shop (
@@ -60,7 +59,6 @@ class shop_(db.Model):
     shop_name = db.Column(db.String(64))
     lat = db.Column(db.NUMERIC(10, 8))
     lng = db.Column(db.NUMERIC(11, 8))
-    # position = db.Column(Geometry('POINT'))
     position = db.Column(db.String(256))
     phone = db.Column(db.NUMERIC(10, 0))
     type = db.Column(db.String(256))
@@ -73,7 +71,7 @@ class shop_(db.Model):
         self.type = type
         self.phone = phone
         self.shop_name = shop_name
-        self.position = 'POINT({} {})'.format(lat, lng)
+        self.position = 'POINT(%.6f %.6f)' % (float(lng), float(lat))
 
 
 """
@@ -186,7 +184,7 @@ class order_content_(db.Model):
     __tablename__ = 'order_content'
     OID = db.Column(db.Integer, primary_key = True)
     PID = db.Column(db.Integer, primary_key = True)
-    amount = amount = db.Column(db.NUMERIC(20, 0))
+    amount = db.Column(db.NUMERIC(20, 0))
 
     def __init__(self, OID, TID, amount):
         self.OID = OID
