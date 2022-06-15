@@ -269,6 +269,75 @@ def update():
             if isInteger(PID) :
                 pass # Not implemented yet...
         return jsonify({'success': True})
+    
+    if message['type'] == 'delete_order':
+        OID = int(message['OID'])
+        # get shop manager info
+        shopInfo = db.session.query(shop_).filter(shop_.SID == order_instance_.SID).first()
+        shopmanagerInfo = db.session.query(user_).filter(user_.UID == shopInfo.UID).first()
+        
+        # get buyer info and order contents
+        orderInfo = db.session.query(order_instance_).filter(order_instance_.OID == OID).first()
+        userInfo = db.session.query(user_).filter(orderInfo.UID == user_.UID).first()
+        order_contentInfo = db.session.query(order_content_).filter(order_content_.OID==OID).all()
+
+        if orderInfo:
+            for content in order_contentInfo:
+                product = db.session.query(item_).filter(content.PID == item_.PID).first()
+                product.amount += content.amount
+                
+            orderInfo.done_time = func.current_timestamp()
+            orderInfo.state = 'canceled'
+            userInfo.balance += orderInfo.amount
+            shopmanagerInfo.balance -= orderInfo.amount
+
+            new_record_user = trade_(TID = null,
+                                    UID = orderInfo.UID,
+                                    type = "Receive",
+                                    amount = orderInfo.amount,
+                                    trade_time = orderInfo.done_time
+                                    )
+            new_record_shop = trade_(TID = null,
+                                    UID = orderInfo.SID,
+                                    type = "Payment",
+                                    amount = orderInfo.amount,
+                                    trade_time = orderInfo.done_time
+                                    )
+
+            db.session.add(new_record_user)
+            db.session.add(new_record_shop)
+            
+            db.session.commit()
+
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False})
+
+    if message['type'] == 'done_order':
+        OID = int(message['OID'])
+        orderInfo = db.session.query(order_instance_).filter(order_instance_.OID == OID).first()
+        
+        if orderInfo:
+            orderInfo.state = 'finished'
+            orderInfo.done_time = func.current_timestamp()
+            
+            ## 交易當下就產生trade record??
+            # new_record = trade_(TID = null,
+            #                     UID = orderInfo.UID,
+            #                     type = orderInfo.type,
+            #                     amount = orderInfo.amount,
+            #                     trade_time = orderInfo.done_time
+            #                     )
+
+            # db.session.add(new_record)
+
+            db.session.commit()
+
+            return jsonify({'success': True})
+        
+        else:
+            return jsonify({'success': False})
+
         
 
 @app.route('/ask', methods = ['POST'])
@@ -390,10 +459,8 @@ def ask():
         print('Asking shop order for: ', message)
         userID = session.get('_user_id')
         userinfo = db.session.query(user_).filter(user_.UID == userID).first()
-        userPos = userinfo.position
 
         shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
-        shopPos = shopInfo.position
 
         ret = {'success': False, 'data': [], 'price': []}
 
@@ -401,11 +468,7 @@ def ask():
         subtotal_price = 0
         order_content = db.session.query(order_content_).filter(order_content_.OID == message['OID']).all()
         
-        
-        distance = func.ST_Distance_Sphere(func.ST_GeomFromText(shopPos), func.ST_GeomFromText(userPos))
-        distance = distance.scalar()
-        print(type(distance))
-        # print(distance.scalar())
+        ## Delivery fee 還沒做！！
 
         for content in order_content:
             product = db.session.query(item_).filter(content.PID == item_.PID).first()
@@ -420,17 +483,22 @@ def ask():
             })
         ret['price'].append({
             'subtotal': subtotal_price,
-            'fee': distance,
-            'total_price': subtotal_price + distance,
+            'fee': 90,
+            'total_price': subtotal_price + 90,
         })
 
         return jsonify(ret)
 
     if message['type'] == 'findshoporder':
         userID = session.get('_user_id')
-        shoporderInfo = db.session.query(order_instance_).filter(order_instance_.SID == shop_.SID).all()
+
+        rule1 = and_(
+                order_instance_.SID == shop_.SID,
+                shop_.UID == userID,
+            )  
+
+        shoporderInfo = db.session.query(order_instance_).filter(rule1).all()
         shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
-        
 
         ret = {'success': False, 'data': []}
         product_list = [] 
@@ -455,6 +523,49 @@ def ask():
 
         return jsonify(ret)
 
+    if message['type'] == 'status':
+        userID = session.get('_user_id')
+
+        rule1 = and_(
+            order_instance_.SID == shop_.SID,
+            shop_.UID == userID,
+            order_instance_.state == message['status'],
+        )
+
+        rule2 = and_(
+            order_instance_.SID == shop_.SID,
+            shop_.UID == userID,
+        )
+
+        if message['status'] == 'all' or message['status'] == 'status':
+            shoporderInfo = db.session.query(order_instance_).filter(rule2).all()
+        else:
+            shoporderInfo = db.session.query(order_instance_).filter(rule1).all()
+
+        shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
+
+        ret = {'success': False, 'data': []}
+        product_list = [] 
+        for order in shoporderInfo:
+            order_content = db.session.query(order_content_).filter(order.OID == order_content_.OID).all()
+            total_price = 0
+
+            for content in order_content:
+                product = db.session.query(item_).filter(content.PID == item_.PID).first()
+                product_list.append(product)
+                total_price += product.price * content.amount
+            
+            ret["data"].append({
+                'orderID': order.OID,
+                'status': order.state,
+                'start': order.create_time,
+                'end': order.done_time,
+                'shop_name': shopInfo.shop_name,
+                'total_price': total_price
+            })
+        
+
+        return jsonify(ret)
         
 
 

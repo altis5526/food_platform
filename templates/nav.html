@@ -395,8 +395,8 @@
 
       <div id="shopOrderPane" class="tab-pane fade">
         <h3>Shop Order</h3>
-        <select>
-          <option value="">Status</option>
+        <select id="select_status" onchange="select_status()">
+          <option value="status">Status</option>
           <option value="all">All</option>
           <option value="finished">Finished</option>
           <option value="not_finished">Not Finished</option>
@@ -717,7 +717,21 @@
               },
               {
                 data: null,
+                render: function (data, type, row) {
+                  if (data['status'] == 'finished' || data['status'] == 'canceled') return null;
+                  else return '<button onclick="doneOrder(\'' + data['orderID'] +
+                    '\')" type="submit" value="Done" class="btn btn-success">Done</button>';
+                },
                 title: "Action"
+              },
+              {
+                data: null,
+                render: function (data, type, row) {
+                  if (data['status'] == 'finished' || data['status'] == 'canceled') return null;
+                  else return '<button onclick="delOrder(\'' + data['orderID'] +
+                    '\')" type="submit" value="Delete" class="btn btn-danger">Cancel</button>';
+                },
+                title: ""
               }
             ],
             "data": data['data']
@@ -806,6 +820,26 @@
         dataType: "json",
         async: false
       });
+    }
+
+    function select_status() {
+      var status=$('#select_status').val();
+      var form_data = new FormData();
+      form_data.append("status", status);
+      form_data.append("type", "status");
+      $.ajax({
+        type: "POST",
+        url: "/ask",
+        data: form_data,
+        success: (data) => {
+            shoporderTable.clear().draw();
+            shoporderTable.rows.add(data['data']).draw();
+        },
+          contentType: false,
+          processData: false,
+          dataType: "json",
+          async: false        
+      })
     }
 
     
@@ -982,7 +1016,59 @@
         data: form_data,
         success: (data) => {
           if (data.success) {
-            alert('Successfully deleted.')
+            alert('Successfully deleted.');
+            window.location.replace('/nav');
+            
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+
+    }
+
+    function doneOrder(item) {
+      var form_data = new FormData();
+      form_data.append("OID", item);
+      form_data.append("type", "done_order");
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('Successfully done.');
+            window.location.replace('/nav');
+            
+          }
+          else {
+            alert('Not exist.');
+            window.location.replace('/nav');
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
+    function delOrder(item) {
+      var form_data = new FormData();
+      form_data.append("OID", item);
+      form_data.append("type", "delete_order");
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('Successfully deleted.');
+            window.location.replace('/nav');
+            
+          }
+          else {
+            alert('Delete failure.');
             window.location.replace('/nav');
           }
         },
@@ -1068,10 +1154,6 @@
         dataType: "json"
       });
     }
-  
-    var status=['All','Finished','Not Finished','Cancel'];
-      var statusSelect=document.getElementById("status-list");
-
 
   </script>
 

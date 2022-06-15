@@ -156,7 +156,7 @@ create table trade (
 """
 class trade_(db.Model):
     __tablename__ = 'trade'
-    TID = db.Column(db.Integer, primary_key = True)
+    TID = db.Column(db.Integer, primary_key = True, autoincrement = True)
     UID = db.Column(db.Integer)
     type = db.Column(db.String(16))
     amount = db.Column(db.NUMERIC(20, 0))
