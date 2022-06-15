@@ -34,13 +34,13 @@
       border: 1px solid #000;
       float: left
     }
-    body {
+    /* body {
       background-image: url('{{ myBackground }}');
       background-repeat: no-repeat;
       background-attachment: fixed;
       background-size: cover;
       background-position: center;
-    }
+    } */
   </style>
 </head>
 
@@ -665,15 +665,15 @@
         form_data.append("type", "order");
         form_data.append("order", sendOrderList);
         $.ajax({
-        type: "POST",
-        url: '/update',
-        data: form_data,
-        success: (data) => {
-          alert("I already send the order, but they won't send anything to you. Ha!~ Ha!~");
-        },
-        contentType: false,
-        processData: false,
-        dataType: "json"
+          type: "POST",
+          url: '/update',
+          data: form_data,
+          success: (data) => {
+            alert("I already send the order, but they won't send anything to you. Ha!~ Ha!~");
+          },
+          contentType: false,
+          processData: false,
+          dataType: "json"
       });
       }
     }
