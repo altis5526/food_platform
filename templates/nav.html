@@ -402,11 +402,18 @@
           <option value="not_finished">Not Finished</option>
           <option value="canceled">Canceled</option>
         </select>
+        
         <div class="row">
           <div class="  col-xs-8">
             <table id="shoporderTable" class="display" style=" margin-top: 15px; width:100%;"></table>
           </div>
         </div>
+
+        <div class="row">
+          <button onclick="delByBatch()" style="margin-left: 18px; margin-top: 30px; margin-bottom: 30px;" class="btn btn-primary">Cancel selected</button>
+          <button onclick="doneByBatch()" style="margin-left: 18px; margin-top: 30px; margin-bottom: 30px;" class="btn btn-primary">Done selected</button>
+        </div>
+        
 
         <!-- Modal -->
         <div class="modal fade" id="shoporderModal" data-backdrop="static" tabindex="-1" role="dialog"
@@ -682,7 +689,16 @@
             "autoWidth": true,
             "lengthMenu": [5, 10, 20, 50],
             "pageLength": 5,
-            "columns": [{
+            "columns": [
+              {
+                data: "orderID", 
+                orderable: false, 
+                render: function (data, type, obj, meta)
+                {
+                  return '<input type="checkbox" name=shoporder_checked id="checked'+ data["orderID"] +'" value="' + data + '">';
+                }
+              },
+              {
                 data: "orderID",
                 title: "Order ID"
               },
@@ -745,6 +761,22 @@
 
     function addItemToList(value, x) {
       orderList[x] = value.checked;
+    }
+
+    function delByBatch(){
+      $("input[name='shoporder_checked']").each(function(){
+        if($(this).prop('checked')){
+          delOrder($(this).val());
+        }
+      });
+    }
+
+    function doneByBatch(){
+      $("input[name='shoporder_checked']").each(function(){
+        if($(this).prop('checked')){
+          doneOrder($(this).val());
+        }
+      });
     }
 
     $(document).ready(function () {
@@ -1038,12 +1070,12 @@
         data: form_data,
         success: (data) => {
           if (data.success) {
-            alert('Successfully done.');
+            alert('Order ID ' + item + ' is successfully done.');
             window.location.replace('/nav');
             
           }
           else {
-            alert('Not exist.');
+            alert('Order ID ' + item + ' does not exist.');
             window.location.replace('/nav');
           }
         },
@@ -1063,12 +1095,12 @@
         data: form_data,
         success: (data) => {
           if (data.success) {
-            alert('Successfully deleted.');
+            alert('Order ID ' + item + ' is successfully canceled.');
             window.location.replace('/nav');
             
           }
           else {
-            alert('Delete failure.');
+            alert('Order ID ' + item + ' does not exist.');
             window.location.replace('/nav');
           }
         },
