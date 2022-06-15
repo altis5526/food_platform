@@ -385,6 +385,76 @@ def ask():
                 'PID': item.PID
             })
         return jsonify(ret)
+
+    if message['type'] == 'findspecificShopOrder':
+        print('Asking shop order for: ', message)
+        userID = session.get('_user_id')
+        userinfo = db.session.query(user_).filter(user_.UID == userID).first()
+        userPos = userinfo.position
+
+        shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
+        shopPos = shopInfo.position
+
+        ret = {'success': False, 'data': [], 'price': []}
+
+        product_list = []
+        subtotal_price = 0
+        order_content = db.session.query(order_content_).filter(order_content_.OID == message['OID']).all()
+        
+        
+        distance = func.ST_Distance_Sphere(func.ST_GeomFromText(shopPos), func.ST_GeomFromText(userPos))
+        distance = distance.scalar()
+        print(type(distance))
+        # print(distance.scalar())
+
+        for content in order_content:
+            product = db.session.query(item_).filter(content.PID == item_.PID).first()
+            product_list.append(product)
+            subtotal_price += product.price * content.amount
+
+            ret['data'].append({
+                'content': base64.b64encode(product.content).decode(),
+                'name': product.item_name,
+                'price': int(product.price),
+                'amount': content.amount,
+            })
+        ret['price'].append({
+            'subtotal': subtotal_price,
+            'fee': distance,
+            'total_price': subtotal_price + distance,
+        })
+
+        return jsonify(ret)
+
+    if message['type'] == 'findshoporder':
+        userID = session.get('_user_id')
+        shoporderInfo = db.session.query(order_instance_).filter(order_instance_.SID == shop_.SID).all()
+        shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
+        
+
+        ret = {'success': False, 'data': []}
+        product_list = [] 
+        for order in shoporderInfo:
+            order_content = db.session.query(order_content_).filter(order.OID == order_content_.OID).all()
+            total_price = 0
+
+            for content in order_content:
+                product = db.session.query(item_).filter(content.PID == item_.PID).first()
+                product_list.append(product)
+                total_price += product.price * content.amount
+            
+            ret["data"].append({
+                'orderID': order.OID,
+                'status': order.state,
+                'start': order.create_time,
+                'end': order.done_time,
+                'shop_name': shopInfo.shop_name,
+                'total_price': total_price
+            })
+        
+
+        return jsonify(ret)
+
         
 
 
@@ -397,6 +467,7 @@ def nav():
 
     userInfo = db.session.query(user_).filter(user_.UID == userID).first()
     shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
+    shoporderInfo = db.session.query(order_instance_).filter(order_instance_.SID == shop_.SID).all()
     
     info = {}
     info.update({'userAccount': userInfo.account})
@@ -438,15 +509,31 @@ def nav():
     else :
         print('This user has no shop.')
         info.update({'hasShop': False})
+
+    if shoporderInfo != None:
+        print('This user has a shoporder.')
+        info.update({"hasShopOrder": True})
+        info.update({"ShopOrder": []})
+        
+        for order in shoporderInfo:
+            info["ShopOrder"].append({
+                'orderID': order.OID,
+                'status': order.state,
+                'start': order.create_time,
+                'end': order.done_time,
+                'shop_name': shopInfo.shop_name
+            })
+            
+        print(info["ShopOrder"])
     
-    backgroundSet = [
-        '/static/images/Ayame.jpg',
-        '/static/images/ina.jpg',
-        '/static/images/fubuki.png',
-        '/static/images/mio.jpg'
-    ]
-    index = np.random.randint(len(backgroundSet))
-    return render_template('nav.html', info = info, myBackground = backgroundSet[index])
+    # backgroundSet = [
+    #     '/static/images/Ayame.jpg',
+    #     '/static/images/ina.jpg',
+    #     '/static/images/fubuki.png',
+    #     '/static/images/mio.jpg'
+    # ]
+    # index = np.random.randint(len(backgroundSet))
+    return render_template('nav.html', info = info)
 
 
 @app.route('/sign-up', methods = ['GET', 'POST'])
