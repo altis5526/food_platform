@@ -128,6 +128,17 @@ def update():
         userID = session.get('_user_id')
         data = db.session.query(user_).filter(user_.UID == userID).first()
 
+        newtran = trade_(
+            None,
+            userID,
+            'charge',
+            int(message['add']),
+            None
+        )
+
+        db.session.add(newtran)
+
+
         data.balance = data.balance + int(message['add'])
 
         db.session.commit()
@@ -327,8 +338,6 @@ def update():
 
                 else:
                     
-
-                    print('FK')
                     # create order instancce 
                     NewOrder = order_instance_(
                         None, 
