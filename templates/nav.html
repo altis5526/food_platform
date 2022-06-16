@@ -390,7 +390,72 @@
 
       <div id="myOrderPane" class="tab-pane fade">
         <h3>Order</h3>
+        <select id="selectMyOrder" onchange="select_myOrder()">
+          <option value="status">Status</option>
+          <option value="all">All</option>
+          <option value="Finished">Finished</option>
+          <option value="Not-Finished">Not Finished</option>
+          <option value="Canceled">Canceled</option>
+        </select>
         
+        <div class="row">
+          <div class="  col-xs-8">
+            <table id="myOrderTable" class="display" style=" margin-top: 15px; width:100%;"></table>
+          </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="MyOrderModal" data-backdrop="static" tabindex="-1" role="dialog"
+          aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Order</h4>
+              </div>
+              <div class="modal-body">
+
+                <!--  -->
+                <div class="row">
+                  <div class="  col-xs-12">
+                    <table id="myOrderContentTable" class="table" style=" margin-top: 15px;"></table>
+                  </div>
+
+                </div>
+                <div class="row">
+                  <div class="  col-xs-12">
+                    <table id="myOrderPriceCalc" class="table" style=" margin-top: 15px;"></table>
+                  </div>
+
+                </div>
+                <!--  -->
+
+              </div>
+              
+            </div>
+
+          </div>
+        </div>
+
+        
+
+      </div>
+
+      <div id="transactionRecordPane" class="tab-pane fade">
+        <h3>Transaction Record</h3>
+        <select id="select_action" onchange="select_action()">
+          <option value="action">Action</option>
+          <option value="all">All</option>
+          <option value="payment">Payment</option>
+          <option value="receive">Receive</option>
+          <option value="recharge">Recharge</option>
+        </select>
+        
+        <div class="row">
+          <div class="  col-xs-8">
+            <table id="transactionTable" class="display" style=" margin-top: 15px; width:100%;"></table>
+          </div>
+        </div>
       </div>
 
       <div id="shopOrderPane" class="tab-pane fade">
@@ -398,9 +463,9 @@
         <select id="select_status" onchange="select_status()">
           <option value="status">Status</option>
           <option value="all">All</option>
-          <option value="finished">Finished</option>
-          <option value="not_finished">Not Finished</option>
-          <option value="canceled">Canceled</option>
+          <option value="Finished">Finished</option>
+          <option value="Not-Finished">Not Finished</option>
+          <option value="Canceled">Canceled</option>
         </select>
         
         <div class="row">
@@ -458,9 +523,9 @@
         <select id="select_action" onchange="select_action()">
           <option value="action">Action</option>
           <option value="all">All</option>
-          <option value="payment">Payment</option>
-          <option value="receive">Receive</option>
-          <option value="recharge">Recharge</option>
+          <option value="Payment">Payment</option>
+          <option value="Receive">Receive</option>
+          <option value="Recharge">Recharge</option>
         </select>
         
         <div class="row">
@@ -629,7 +694,102 @@
   <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
   <script>
   
-    var shopTable, itemTable, orderList, shoporderTable, itemList, confirmOrderTable, transactionTable;
+    var myOrderContentTable, myOrderPriceCalc, shopTable, itemTable, orderList, shoporderTable, itemList, confirmOrderTable, transactionTable, myOrderTable;
+    
+    function loadMyOrderModal(x) {
+      var form_data = new FormData();
+      form_data.append("type", "findspecificShopOrder");
+      form_data.append("OID", x);
+      $.ajax({
+        type: "POST",
+        url: "/ask",
+        data: form_data,
+        success: (data) => {
+          myOrderContentTable.clear().draw();
+          myOrderContentTable.rows.add(data['data']).draw();
+          myOrderPriceCalc.clear().draw();
+          myOrderPriceCalc.rows.add(data['price']).draw();
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
+    function loadMyOrderTable() {
+      var form_data = new FormData();
+      form_data.append("type", "myOrder");
+      form_data.append("status", $("#selectMyOrder").val());
+      $.ajax({
+        type: "POST",
+        url: "/ask",
+        data: form_data,
+        success: (data) => {
+          myOrderTable = $("#myOrderTable").DataTable({
+            "searching": false,
+            "autoWidth": true,
+            "lengthMenu": [5, 10, 20, 50],
+            "pageLength": 5,
+            "columns": [
+              {
+                data: "orderID", 
+                orderable: false, 
+                render: function (data, type, obj, meta)
+                {
+                  return '<input type="checkbox" name=shoporder_checked id="checked'+ data["orderID"] +'" value="' + data + '">';
+                }
+              },
+              {
+                data: "orderID",
+                title: "Order ID"
+              },
+              {
+                data: "status",
+                title: "Status"
+              },
+              {
+                data: "start",
+                title: "Start"
+              },
+              {
+                data: "end",
+                title: "End"
+              },
+              {
+                data: "shop_name",
+                title: "Shop name"
+              },
+              {
+                data: "total_price",
+                title: "Total price"
+              },
+              {
+                data: null,
+                render: function (data, type, row) {
+                  return '<button onclick="loadMyOrderModal(\'' + data['orderID'] +
+                    '\')" type="button" class="btn btn-info " data-toggle="modal" data-target="#MyOrderModal">Order details</button>';
+                },
+                "sortable": false,
+                title: "Order details"
+              },
+              {
+                data: null,
+                render: function (data, type, row) {
+                  if (data['status'] == 'finished' || data['status'] == 'canceled') return null;
+                  else return '<button onclick="delOrder(\'' + data['orderID'] +
+                    '\')" type="submit" value="Delete" class="btn btn-danger">Cancel</button>';
+                },
+                title: ""
+              }
+            ],
+            "data": data['data']
+          })
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
 
     function sendOrder() {
       order_data = '';
@@ -753,7 +913,6 @@
         processData: false,
         dataType: "json"
       });
-      
     }
 
     function loadShopTable() {
@@ -904,21 +1063,12 @@
         url: "/ask",
         data: form_data,
         success: (data) => {
-          console.log(data);
           transactionTable = $("#transactionTable").DataTable({
             "searching": false,
             "autoWidth": true,
             "lengthMenu": [5, 10, 20, 50],
             "pageLength": 5,
             "columns": [
-              // {
-              //   data: "orderID", 
-              //   orderable: false, 
-              //   render: function (data, type, obj, meta)
-              //   {
-              //     return '<input type="checkbox" name=shoporder_checked id="checked'+ data["orderID"] +'" value="' + data + '">';
-              //   }
-              // },
               {
                 data: "recordID",
                 title: "Record ID"
@@ -1057,6 +1207,19 @@
           {data: "amount", title: "Quantity"}, 
         ]
       })
+      myOrderContentTable = $("#myOrderContentTable").DataTable({
+        "searching": false,
+        "orderable": false,
+        "info": false,
+        "columns": [
+          {data: "content", title: "Picture", render: function(data, type, row){
+            return '<img src="data:image/jpeg;base64,' + data +  '" width="50" height="50">';
+          }, "sortable": false},
+          {data: "name", title: "meal name"},
+          {data: "price", title: "price"},
+          {data: "amount", title: "Quantity"}, 
+        ]
+      })
       price_calcu = $("#price_calcu").DataTable({
         "searching": false,
         "orderable": false,
@@ -1068,11 +1231,43 @@
           {data: "total_price", title: "Total price"},
         ]
       })
+      myOrderPriceCalc = $("#myOrderPriceCalc").DataTable({
+        "searching": false,
+        "orderable": false,
+        "info": false,
+        "paging": false,
+        "columns": [
+          {data: "subtotal", title: "subtotal"},
+          {data: "fee", title: "Delivery fee"},
+          {data: "total_price", title: "Total price"},
+        ]
+      });
       loadShopTable();
+      loadMyOrderTable();
       loadShopOrderTable();
       loadTransactionTable();
     });
     
+    function select_myOrder() {
+      var status=$('#selectMyOrder').val();
+      var form_data = new FormData();
+      form_data.append("status", status);
+      form_data.append("type", "myOrder");
+      $.ajax({
+        type: "POST",
+        url: "/ask",
+        data: form_data,
+        success: (data) => {
+            myOrderTable.clear().draw();
+            myOrderTable.rows.add(data['data']).draw();
+        },
+          contentType: false,
+          processData: false,
+          dataType: "json",
+          async: false        
+      })
+    }
+
     function reloadShopTable() {
       var form_data = new FormData();
       form_data.append("shopName", $("#shopNameInput").val());
