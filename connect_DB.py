@@ -1,3 +1,4 @@
+import json
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
 from flask import Flask,render_template, request, flash, session, redirect, url_for, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
@@ -263,12 +264,103 @@ def update():
 
     if message['type'] == 'order':
         print('User send order: ', message)
-        PIDS = message['order'].split(',')
         
-        for PID in PIDS :
-            if isInteger(PID) :
-                pass # Not implemented yet...
-        return jsonify({'success': True})
+        ret = {'success': True}
+
+        error_message = ''
+
+        PIDS = list(message['order'].split())
+
+        userID = session.get('_user_id')
+        user = db.session.query(user_).filter(user_.UID == userID).first()
+
+        sum = 0.0
+        items = []
+
+        for i in range(0, len(PIDS), 2):
+            key, value = PIDS[i], PIDS[i + 1]
+            item = db.session.query(item_).filter(item_.PID == int(key)).first()
+            items.append(item)
+            print(f'add item {item}')
+            
+            if not item:
+                ret['success'] = False
+                error_message += f'Item {key} does not exists.'
+
+            elif not isInteger(value) or int(value) < 0:
+                ret['success'] = False
+                error_message += f'Item {item.item_name}: input value should be non-negative integer.\n'
+            
+            elif item.amount < int(value):
+                ret['success'] = False
+                error_message += f'Item {item.item_name}: out of stock.\n'
+            
+            else:
+                sum += int(value) * int(item.price)
+
+        if len(PIDS) == 0 : 
+            return jsonify({'success': False, 'message': 'Your order list is empty.'})
+
+        if ret['success']: 
+
+            if sum > user.balance: 
+                ret['success'] = False
+                ret.update({'message': 'You are so pooorrr.....\nExpensive is never the flaw of our product, but yours.'})
+            else:
+                ret.update({'message': 'You are so rich...'})
+
+
+                shop = db.session.query(shop_).filter(shop_.SID == items[0].SID).first()
+                distance = db.session.query(func.ST_Distance_Sphere(func.ST_GeomFromText(shop.position), func.ST_GeomFromText(user.position))).first()[0]
+
+                # create order instancce 
+                NewOrder = order_instance_(
+                    None, 
+                    userID,
+                    shop.SID,
+                    'Not done',
+                    None,
+                    None,
+                    distance, 
+                    sum,
+                    
+                )
+
+                print(items)
+                
+
+
+                
+
+                # distance = func.ST_Distance_Sphere(func.ST_GeomFromText(shop.position), func.ST_GeomFromText(user.position))
+                # distance = distance.scalar()
+                print(distance)
+                print(type(distance))
+                # print(distance.scalar())
+
+                for i in range(0, len(PIDS), 2):
+                    key, value = int(PIDS[i]), int(PIDS[i + 1])
+
+                    # item = db.session.query(item_).filter(item_.PID == int(key)).first()
+                    # item.amount -= value
+
+                    # newOrder = order_content_(
+                    #     None,
+                    #     None,
+
+
+                    # )
+
+                    # db.session.commit()
+                
+                return jsonify(ret)
+
+
+        else:
+            ret.update({'message': error_message})
+            return jsonify(ret)
+        
+        return jsonify({'success': False})
         
 
 @app.route('/ask', methods = ['POST'])
@@ -387,10 +479,13 @@ def ask():
         return jsonify(ret)
 
     if message['type'] == 'findspecificShopOrder':
+
         print('Asking shop order for: ', message)
+
         userID = session.get('_user_id')
         userinfo = db.session.query(user_).filter(user_.UID == userID).first()
         userPos = userinfo.position
+
 
         shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
         shopPos = shopInfo.position
@@ -401,11 +496,6 @@ def ask():
         subtotal_price = 0
         order_content = db.session.query(order_content_).filter(order_content_.OID == message['OID']).all()
         
-        
-        distance = func.ST_Distance_Sphere(func.ST_GeomFromText(shopPos), func.ST_GeomFromText(userPos))
-        distance = distance.scalar()
-        print(type(distance))
-        # print(distance.scalar())
 
         for content in order_content:
             product = db.session.query(item_).filter(content.PID == item_.PID).first()
@@ -502,7 +592,7 @@ def nav():
                     self.content = content
                     self.amount = amount
             for item in items:
-                print('Add itme: ', item)
+                print('Add item: ', item)
                 image = base64.b64encode(item.content).decode()
                 Item = tmpItem(item.PID, item.item_name, item.price, image, item.amount)
                 info['items'].append(Item)

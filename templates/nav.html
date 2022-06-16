@@ -525,7 +525,6 @@
         </div>
 
 
-
         <!-- Modal -->
         <div class="modal fade" id="orderModal" data-backdrop="static" tabindex="-1" role="dialog"
           aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -540,7 +539,7 @@
 
                 <!--  -->
                 <div class="row">
-                  <div class="  col-xs-12">
+                  <div class="col-xs-12">
                     <table id="orderTable" class="table" style=" margin-top: 15px;"></table>
                   </div>
 
@@ -549,11 +548,52 @@
 
               </div>
               <div class="modal-footer">
-                <button onclick="sendOrder()" type="button" class="btn btn-default" data-dismiss="modal">Order</button>
+                <div class="col-sm-5"></div>
+                  <select class="form-control" id="orderType">
+                    <option value="pickUp">Pick-up</option>
+                    <option value="delivery">Delivery</option>
+                  </select>
+                  <!-- <button onclick="" type="button" class="btn btn-default" data-dismiss="modal">Calculate the price</button> -->
+                  '<button onclick="loadconfirmModal()" type="button" class="btn btn-info " data-toggle="modal" data-target="#confirmModal">Calculate the price</button>';
+                </div>
               </div>
+             
             </div>
 
-          </div>
+        </div>
+
+
+        <div class="modal fade" id="confirmModal" data-backdrop="static" tabindex="-1" role="dialog"
+          aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">menu</h4>
+              </div>
+              <div class="modal-body">
+
+                <!--  -->
+                <div class="row">
+                  <div class="col-xs-12">
+                    <table id="confirmTable" class="table" style=" margin-top: 15px;"></table>
+                  </div>
+
+                </div>
+                <!--  -->
+
+              </div>
+                <div class="modal-footer">
+                  <button onclick="" type="button" class="btn btn-default" data-dismiss="modal">Order</button>
+                </div>
+              </div>
+             
+            </div>
+
+        </div>
+
+
         </div>
 
 
@@ -570,6 +610,10 @@
   <script>
   
     var shopTable, itemTable, orderList, shoporderTable;
+    
+    function loadConfirmModal() {
+
+    }
 
     function loadItemModal(x) {
       orderList = {};
@@ -729,8 +773,22 @@
       });
     }
 
-    function addItemToList(value, x) {
-      orderList[x] = value.checked;
+    function addItemToList(obj, x) {
+      orderList[x] = obj.value;
+    }
+
+    function updButton(x, val) {
+      itemCnt = $("#item_"+ x);
+      var currentVal = parseInt(itemCnt.val())
+      itemCnt.val(currentVal + val).change();
+      if(currentVal + val > 0) {
+        minusBT = $("#minusBT_" + x)
+        minusBT.attr('disabled', false);
+      }
+      else {
+        minusBT = $("#minusBT_" + x)
+        minusBT.attr('disabled', true);
+      }  
     }
 
     $(document).ready(function () {
@@ -752,7 +810,21 @@
           {data: "price", title: "price"},
           {data: "amount", title: "Quantity"},
           {data: "PID", title: "Order check", render: function(data, type, full, meta){
-            return '<input onchange="addItemToList(this, ' + data + ')" type="checkbox" id="item_' + data + '">'
+            return '<div class="input-group">\
+                      <span class="input-group-btn">\
+                          <button type="button" id="minusBT_' + data + '"onclick="updButton(' + data + ', -1' + ')" class="btn btn-default btn-number" disabled="disabled" data-type="minus">\
+                              <span class="glyphicon glyphicon-minus"></span>\
+                          </button>\
+                      </span>\
+                      <input type="text" id="item_' + data + '" class="form-control input-number" value="0" min="0">\
+                      <span class="input-group-btn">\
+                          <button type="button" id="addBT_' + data + '"onclick="updButton(' + data + ', 1' + ')" class="btn btn-default btn-number" data-type="plus">\
+                              <span class="glyphicon glyphicon-plus"></span>\
+                          </button>\
+                      </span>\
+                    </div>'
+            // return '<div class="row"><input onchange="addItemToList(this, ' +  data + ')" id="item_' + data + '" value="0"></div>'
+            // return '<input onchange="addItemToList(this, ' + data + ')" type="checkbox" id="item_' + data + '">'
           }, "sortable": false}
         ]
       });
@@ -810,31 +882,45 @@
 
     
     function sendOrder() {
-      sendOrderList = []
+      // sendOrderDict = {}
+      // for (const [key, value] of Object.entries(orderList)) {
+      //   if(value > 0) {
+      //     stock = $('#item').val()
+      //     sendOrderDict[key] = value;
+      //   }
+      //   else if(value < 0) {
+      //     alert('Your order should not contain negative number.');
+      //   }
+      // }
+      // if(sendOrderDict.length == 0) {
+      //   alert("Your order list is empty...");
+      // }
+      // else {
+      order_data = '';
       for (const [key, value] of Object.entries(orderList)) {
-        if(value) {
-          sendOrderList.push(key);
-        }
+        order_data = order_data + key + ' ' + value + ' ';
       }
-      if(sendOrderList.length == 0) {
-        alert("Your order list is empty...");
-      }
-      else {
-        form_data = new FormData();
-        form_data.append("type", "order");
-        form_data.append("order", sendOrderList);
-        $.ajax({
-          type: "POST",
-          url: '/update',
-          data: form_data,
-          success: (data) => {
-            alert("I already send the order, but they won't send anything to you. Ha!~ Ha!~");
-          },
-          contentType: false,
-          processData: false,
-          dataType: "json"
+      form_data = new FormData();
+      form_data.append("type", "order");
+      form_data.append("order", order_data);
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          // alert("I already send the order, but they won't send anything to you. Ha!~ Ha!~");
+          if(data['success']) {
+            alert(data['message']);
+          }
+          else {
+            alert('Your order have been sent successfully!!');  
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
       });
-      }
+      // }
     }
     
     function addShop() {
