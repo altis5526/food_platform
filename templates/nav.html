@@ -395,18 +395,25 @@
 
       <div id="shopOrderPane" class="tab-pane fade">
         <h3>Shop Order</h3>
-        <select>
-          <option value="">Status</option>
+        <select id="select_status" onchange="select_status()">
+          <option value="status">Status</option>
           <option value="all">All</option>
           <option value="finished">Finished</option>
           <option value="not_finished">Not Finished</option>
           <option value="canceled">Canceled</option>
         </select>
+        
         <div class="row">
           <div class="  col-xs-8">
             <table id="shoporderTable" class="display" style=" margin-top: 15px; width:100%;"></table>
           </div>
         </div>
+
+        <div class="row">
+          <button onclick="delByBatch()" style="margin-left: 18px; margin-top: 30px; margin-bottom: 30px;" class="btn btn-primary">Cancel selected</button>
+          <button onclick="doneByBatch()" style="margin-left: 18px; margin-top: 30px; margin-bottom: 30px;" class="btn btn-primary">Done selected</button>
+        </div>
+        
 
         <!-- Modal -->
         <div class="modal fade" id="shoporderModal" data-backdrop="static" tabindex="-1" role="dialog"
@@ -554,7 +561,7 @@
                     <option value="delivery">Delivery</option>
                   </select>
                   <!-- <button onclick="" type="button" class="btn btn-default" data-dismiss="modal">Calculate the price</button> -->
-                  '<button onclick="loadconfirmModal()" type="button" class="btn btn-info " data-toggle="modal" data-target="#confirmModal">Calculate the price</button>';
+                  <button onclick="loadConfirmModal()" type="button" class="btn btn-info " data-toggle="modal" data-target="#confirmModal">Calculate the price</button>
                 </div>
               </div>
              
@@ -570,14 +577,14 @@
             <div class="modal-content">
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">menu</h4>
+                <h4 class="modal-title">confirm</h4>
               </div>
               <div class="modal-body">
 
                 <!--  -->
                 <div class="row">
                   <div class="col-xs-12">
-                    <table id="confirmTable" class="table" style=" margin-top: 15px;"></table>
+                    <table id="confirmOrderTable" class="table" style=" margin-top: 15px;"></table>
                   </div>
 
                 </div>
@@ -585,15 +592,15 @@
 
               </div>
                 <div class="modal-footer">
-                  <button onclick="" type="button" class="btn btn-default" data-dismiss="modal">Order</button>
-                </div>
+                  <button onclick="sendOrder()" type="button" class="btn btn-default" data-dismiss="modal">Order</button>
+                  <p id="subTotal_">Subtotal: 0</p>
+                  <p id="deliveryFee_">Delivery fee: 0</p>
+                  <p id="total_">Total: 0</p>
+                </div>  
               </div>
              
             </div>
-
         </div>
-
-
         </div>
 
 
@@ -609,10 +616,78 @@
   <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
   <script>
   
-    var shopTable, itemTable, orderList, shoporderTable;
-    
-    function loadConfirmModal() {
+    var shopTable, itemTable, orderList, shoporderTable, itemList, confirmOrderTable;
 
+    function sendOrder() {
+      order_data = '';
+      for (const [key, value] of Object.entries(orderList)) {
+        order_data = order_data + key + ' ' + value + ' ';
+      }
+      form_data = new FormData();
+      form_data.append("chk", "order");
+      form_data.append("type", "order");
+      form_data.append("order", order_data);
+      form_data.append("orderType", $("#orderType").val());
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          // alert("I already send the order, but they won't send anything to you. Ha!~ Ha!~");
+          if(data['success']) {
+            alert('order successfully sent...');
+          }
+          else {
+            // alert('Your order have been sent successfully!!');  
+            alert(data['message']);
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
+    function loadConfirmModal() {
+      order_data = '';
+      for (const [key, value] of Object.entries(orderList)) {
+        order_data = order_data + key + ' ' + value + ' ';
+      }
+      form_data = new FormData();
+      form_data.append("chk", "cal");
+      form_data.append("type", "order");
+      form_data.append("order", order_data);
+      form_data.append("orderType", $("#orderType").val());
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          // alert("I already send the order, but they won't send anything to you. Ha!~ Ha!~");
+          if(data['success']) {
+            some_data = []
+            for (const [x, value] of Object.entries(orderList)) {
+              some_data.push({'content': itemList[x]['content'], 'name': itemList[x]['name'], 'price': itemList[x]['price'], 'amount': value});
+            }
+            confirmOrderTable.clear().draw()
+            confirmOrderTable.rows.add(some_data).draw();
+            
+            $("#subTotal_").text("Subtotal: " + data['subtotal'])
+            $("#deliveryFee_").text("Delivery fee: " + data['delivery'])
+            $("#total_").text("Total: " + data['total'])
+
+           
+
+          }
+          else {
+            // alert('Your order have been sent successfully!!');  
+            alert(data['message']);
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
     }
 
     function loadItemModal(x) {
@@ -625,6 +700,17 @@
         url: "/ask",
         data: form_data,
         success: (data) => {
+          itemList = {}
+          console.log(data);
+          for(it in data['data']) {
+            // console.log();
+            itemList[data['data'][it]['PID']] = {};
+            itemList[data['data'][it]['PID']]['amount'] = data['data'][it]['amount'];
+            itemList[data['data'][it]['PID']]['content'] = data['data'][it]['content'];
+            itemList[data['data'][it]['PID']]['name'] = data['data'][it]['name'];
+            itemList[data['data'][it]['PID']]['price'] = data['data'][it]['price'];
+          }
+          // console.log(itemList);
           orderTable.clear().draw();
           orderTable.rows.add(data['data']).draw();
         },
@@ -726,7 +812,16 @@
             "autoWidth": true,
             "lengthMenu": [5, 10, 20, 50],
             "pageLength": 5,
-            "columns": [{
+            "columns": [
+              {
+                data: "orderID", 
+                orderable: false, 
+                render: function (data, type, obj, meta)
+                {
+                  return '<input type="checkbox" name=shoporder_checked id="checked'+ data["orderID"] +'" value="' + data + '">';
+                }
+              },
+              {
                 data: "orderID",
                 title: "Order ID"
               },
@@ -761,7 +856,21 @@
               },
               {
                 data: null,
+                render: function (data, type, row) {
+                  if (data['status'] == 'finished' || data['status'] == 'canceled') return null;
+                  else return '<button onclick="doneOrder(\'' + data['orderID'] +
+                    '\')" type="submit" value="Done" class="btn btn-success">Done</button>';
+                },
                 title: "Action"
+              },
+              {
+                data: null,
+                render: function (data, type, row) {
+                  if (data['status'] == 'finished' || data['status'] == 'canceled') return null;
+                  else return '<button onclick="delOrder(\'' + data['orderID'] +
+                    '\')" type="submit" value="Delete" class="btn btn-danger">Cancel</button>';
+                },
+                title: ""
               }
             ],
             "data": data['data']
@@ -782,13 +891,38 @@
       var currentVal = parseInt(itemCnt.val())
       itemCnt.val(currentVal + val).change();
       if(currentVal + val > 0) {
-        minusBT = $("#minusBT_" + x)
+        minusBT = $("#minusBT_" + x);
         minusBT.attr('disabled', false);
       }
       else {
-        minusBT = $("#minusBT_" + x)
+        minusBT = $("#minusBT_" + x);
         minusBT.attr('disabled', true);
       }  
+      if(currentVal + val >= itemList[x]['amount']) {
+          addBT = $("#addBT_" + x);
+          addBT.attr('disabled', true);
+      }
+      else {
+          addBT = $("#addBT_" + x);
+          addBT.attr('disabled', false);
+      }
+      orderList[x] = currentVal + val;
+    }
+
+    function delByBatch(){
+      $("input[name='shoporder_checked']").each(function(){
+        if($(this).prop('checked')){
+          delOrder($(this).val());
+        }
+      });
+    }
+
+    function doneByBatch(){
+      $("input[name='shoporder_checked']").each(function(){
+        if($(this).prop('checked')){
+          doneOrder($(this).val());
+        }
+      });
     }
 
     $(document).ready(function () {
@@ -816,7 +950,7 @@
                               <span class="glyphicon glyphicon-minus"></span>\
                           </button>\
                       </span>\
-                      <input type="text" id="item_' + data + '" class="form-control input-number" value="0" min="0">\
+                      <input disabled type="text" id="item_' + data + '" class="form-control input-number" value="0" min="0">\
                       <span class="input-group-btn">\
                           <button type="button" id="addBT_' + data + '"onclick="updButton(' + data + ', 1' + ')" class="btn btn-default btn-number" data-type="plus">\
                               <span class="glyphicon glyphicon-plus"></span>\
@@ -826,6 +960,21 @@
             // return '<div class="row"><input onchange="addItemToList(this, ' +  data + ')" id="item_' + data + '" value="0"></div>'
             // return '<input onchange="addItemToList(this, ' + data + ')" type="checkbox" id="item_' + data + '">'
           }, "sortable": false}
+        ]
+      });
+      confirmOrderTable = $("#confirmOrderTable").DataTable({
+        "searching": false,
+        "orderable": false,
+        "lengthMenu": [5, 10, 20],
+        "pageLength": 5,
+        "info": false,
+        "columns": [
+          {data: "content", title: "Picture", render: function(data, type, row){
+            return '<img src="data:image/jpeg;base64,' + data +  '" width="50" height="50">';
+          }, "sortable": false},
+          {data: "name", title: "meal name"},
+          {data: "price", title: "price"},
+          {data: "amount", title: "Order Quantity"}
         ]
       });
       shoporder = $("#shoporder").DataTable({
@@ -880,48 +1029,25 @@
       });
     }
 
-    
-    function sendOrder() {
-      // sendOrderDict = {}
-      // for (const [key, value] of Object.entries(orderList)) {
-      //   if(value > 0) {
-      //     stock = $('#item').val()
-      //     sendOrderDict[key] = value;
-      //   }
-      //   else if(value < 0) {
-      //     alert('Your order should not contain negative number.');
-      //   }
-      // }
-      // if(sendOrderDict.length == 0) {
-      //   alert("Your order list is empty...");
-      // }
-      // else {
-      order_data = '';
-      for (const [key, value] of Object.entries(orderList)) {
-        order_data = order_data + key + ' ' + value + ' ';
-      }
-      form_data = new FormData();
-      form_data.append("type", "order");
-      form_data.append("order", order_data);
+    function select_status() {
+      var status=$('#select_status').val();
+      var form_data = new FormData();
+      form_data.append("status", status);
+      form_data.append("type", "status");
       $.ajax({
         type: "POST",
-        url: '/update',
+        url: "/ask",
         data: form_data,
         success: (data) => {
-          // alert("I already send the order, but they won't send anything to you. Ha!~ Ha!~");
-          if(data['success']) {
-            alert(data['message']);
-          }
-          else {
-            alert('Your order have been sent successfully!!');  
-          }
+            shoporderTable.clear().draw();
+            shoporderTable.rows.add(data['data']).draw();
         },
-        contentType: false,
-        processData: false,
-        dataType: "json"
-      });
-      // }
-    }
+          contentType: false,
+          processData: false,
+          dataType: "json",
+          async: false        
+      })
+    }  
     
     function addShop() {
       var form_data = new FormData();
@@ -1068,7 +1194,59 @@
         data: form_data,
         success: (data) => {
           if (data.success) {
-            alert('Successfully deleted.')
+            alert('Successfully deleted.');
+            window.location.replace('/nav');
+            
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+
+    }
+
+    function doneOrder(item) {
+      var form_data = new FormData();
+      form_data.append("OID", item);
+      form_data.append("type", "done_order");
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('Order ID ' + item + ' is successfully done.');
+            window.location.replace('/nav');
+            
+          }
+          else {
+            alert('Order ID ' + item + ' does not exist.');
+            window.location.replace('/nav');
+          }
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
+    function delOrder(item) {
+      var form_data = new FormData();
+      form_data.append("OID", item);
+      form_data.append("type", "delete_order");
+      $.ajax({
+        type: "POST",
+        url: '/update',
+        data: form_data,
+        success: (data) => {
+          if (data.success) {
+            alert('Order ID ' + item + ' is successfully canceled.');
+            window.location.replace('/nav');
+            
+          }
+          else {
+            alert('Order ID ' + item + ' does not exist.');
             window.location.replace('/nav');
           }
         },
@@ -1154,10 +1332,6 @@
         dataType: "json"
       });
     }
-  
-    var status=['All','Finished','Not Finished','Cancel'];
-      var statusSelect=document.getElementById("status-list");
-
 
   </script>
 

@@ -156,7 +156,7 @@ create table trade (
 """
 class trade_(db.Model):
     __tablename__ = 'trade'
-    TID = db.Column(db.Integer, primary_key = True)
+    TID = db.Column(db.Integer, primary_key = True, autoincrement = True)
     UID = db.Column(db.Integer)
     type = db.Column(db.String(16))
     amount = db.Column(db.NUMERIC(20, 0))
@@ -186,9 +186,9 @@ class order_content_(db.Model):
     PID = db.Column(db.Integer, primary_key = True)
     amount = db.Column(db.NUMERIC(20, 0))
 
-    def __init__(self, OID, TID, amount):
+    def __init__(self, OID, PID, amount):
         self.OID = OID
-        self.TID = TID
+        self.PID = PID
         self.amount = amount
 
 # empty message for different attribute
