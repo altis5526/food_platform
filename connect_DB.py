@@ -131,9 +131,10 @@ def update():
         newtran = trade_(
             None,
             userID,
-            'charge',
+            'recharge',
             int(message['add']),
-            None
+            None,
+            str(data.name)
         )
 
         db.session.add(newtran)
@@ -376,8 +377,7 @@ def update():
             return jsonify(ret)
         
         return jsonify({'success': False})
-        
-    
+          
     if message['type'] == 'delete_order':
         OID = int(message['OID'])
         # get shop manager info
@@ -452,6 +452,7 @@ def update():
 @login_required
 def ask():
     message = request.form
+    print(message)
     if message['type'] == 'findShop' :
         print('Searching for: ', message)
 
@@ -588,27 +589,33 @@ def ask():
 
             ret['data'].append({
                 'content': base64.b64encode(product.content).decode(),
-                'name': product.item_name,
+                'name': str(product.item_name),
                 'price': int(product.price),
-                'amount': content.amount,
+                'amount': int(content.amount),
             })
         ret['price'].append({
-            'subtotal': subtotal_price,
+            'subtotal': int(subtotal_price),
             'fee': 90,
-            'total_price': subtotal_price + 90,
+            'total_price': int(subtotal_price) + 90,
         })
 
         return jsonify(ret)
 
     if message['type'] == 'findshoporder':
+        
+        print('FK', message)
         userID = session.get('_user_id')
 
-        rule1 = and_(
-                order_instance_.SID == shop_.SID,
-                shop_.UID == userID,
-            )  
+        shopID = db.session.query(shop_).filter(shop_.UID == userID).first()
+        
+        if not shopID : 
+            return jsonify({
+                'success': False,
+                '雞雞': '雞雞'
+            })
 
-        shoporderInfo = db.session.query(order_instance_).filter(rule1).all()
+        shoporderInfo = db.session.query(order_instance_).filter(order_instance_.SID == shopID.SID).all()
+
         shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
 
         ret = {'success': False, 'data': []}
@@ -623,18 +630,20 @@ def ask():
                 total_price += product.price * content.amount
             
             ret["data"].append({
-                'orderID': order.OID,
-                'status': order.state,
-                'start': order.create_time,
-                'end': order.done_time,
-                'shop_name': shopInfo.shop_name,
-                'total_price': total_price
+                'orderID': int(order.OID),
+                'status': str(order.state),
+                'start': str(order.create_time),
+                'end': str(order.done_time),
+                'shop_name': str(shopInfo.shop_name),
+                'total_price': int(total_price)
             })
         
-
+        print(f'find shop order {ret}')
         return jsonify(ret)
 
     if message['type'] == 'status':
+        
+        print(f'query status: {message}')
         userID = session.get('_user_id')
 
         rule1 = and_(
@@ -667,18 +676,53 @@ def ask():
                 total_price += product.price * content.amount
             
             ret["data"].append({
-                'orderID': order.OID,
-                'status': order.state,
-                'start': order.create_time,
-                'end': order.done_time,
-                'shop_name': shopInfo.shop_name,
+                'orderID': int(order.OID),
+                'status': str(order.state),
+                'start': str(order.create_time),
+                'end': str(order.done_time),
+                'shop_name': str(shopInfo.shop_name),
                 'total_price': total_price
             })
-        
+
+        print(f'status return: {ret}')
 
         return jsonify(ret)
-        
 
+    if message['type'] == 'action':
+        
+        userID = session.get('_user_id')
+
+        rule1 = and_(
+            trade_.UID == userID,
+            trade_.type == message['action'],
+        )
+
+        if message['action'] == 'all' or message['action'] == 'action':
+            transactionInfo = db.session.query(trade_).filter(trade_.UID == userID).all()
+        else:
+            transactionInfo = db.session.query(trade_).filter(rule1).all()
+
+        shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
+
+        ret = {'success': False, 'data': []}
+
+        for transaction in transactionInfo:
+            amount_int = int(transaction.amount)
+            amount = str(transaction.amount)
+            if amount_int > 0:
+                amount = '+' + amount
+            ret["data"].append({
+                'recordID': int(transaction.TID),
+                'action': str(transaction.type),
+                'time': str(transaction.trade_time),
+                'trader': str(transaction.trader),
+                'amount_change': amount
+            })
+
+        ret['success'] = True
+        print(f'status return: {ret}')
+
+        return jsonify(ret)
 
 
 @app.route('/nav', methods = ['GET'])
@@ -702,12 +746,14 @@ def nav():
     if shopInfo != None:
         print('This user has a shop.')
         info.update({'hasShop': True})
+        phone = str(shopInfo.phone)
+        while len(phone) < 10 : phone = '0' + phone
         info['shop'] = {
-            'shop_name': shopInfo.shop_name,
-            'latitude': shopInfo.lat,
-            'longitude': shopInfo.lng,
-            'phone': shopInfo.phone,
-            'food_category': shopInfo.type
+            'shop_name': str(shopInfo.shop_name),
+            'latitude': float(shopInfo.lat),
+            'longitude': float(shopInfo.lng),
+            'phone': phone,
+            'food_category': str(shopInfo.type)
         }
         items = db.session.query(item_).filter(item_.SID == shopInfo.SID).all()
         if len(items) > 0:
@@ -739,11 +785,11 @@ def nav():
         
         for order in shoporderInfo:
             info["ShopOrder"].append({
-                'orderID': order.OID,
-                'status': order.state,
-                'start': order.create_time,
-                'end': order.done_time,
-                'shop_name': shopInfo.shop_name
+                'orderID': int(order.OID),
+                'status': str(order.state),
+                'start': str(order.create_time),
+                'end': str(order.done_time),
+                'shop_name': str(shopInfo.shop_name)
             })
             
         print(info["ShopOrder"])

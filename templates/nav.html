@@ -455,6 +455,19 @@
 
       <div id="transactionRecordPane" class="tab-pane fade">
         <h3>Transaction Record</h3>
+        <select id="select_action" onchange="select_action()">
+          <option value="action">Action</option>
+          <option value="all">All</option>
+          <option value="payment">Payment</option>
+          <option value="receive">Receive</option>
+          <option value="recharge">Recharge</option>
+        </select>
+        
+        <div class="row">
+          <div class="  col-xs-8">
+            <table id="transactionTable" class="display" style=" margin-top: 15px; width:100%;"></table>
+          </div>
+        </div>
       </div>
 
       <div id="home" class="tab-pane fade in active">
@@ -616,7 +629,7 @@
   <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script> -->
   <script>
   
-    var shopTable, itemTable, orderList, shoporderTable, itemList, confirmOrderTable;
+    var shopTable, itemTable, orderList, shoporderTable, itemList, confirmOrderTable, transactionTable;
 
     function sendOrder() {
       order_data = '';
@@ -800,7 +813,7 @@
 
     function loadShopOrderTable() {
       var form_data = new FormData();
-      form_data.append("OrderID", $("#shopNameInput").val());
+      // form_data.append("OrderID", $("#shopNameInput").val());
       form_data.append("type", "findshoporder");
       $.ajax({
         type: "POST",
@@ -827,7 +840,7 @@
               },
               {
                 data: "status",
-                title: "status"
+                title: "Status"
               },
               {
                 data: "start",
@@ -871,6 +884,60 @@
                     '\')" type="submit" value="Delete" class="btn btn-danger">Cancel</button>';
                 },
                 title: ""
+              }
+            ],
+            "data": data['data']
+          })
+        },
+        contentType: false,
+        processData: false,
+        dataType: "json"
+      });
+    }
+
+    function loadTransactionTable() {
+      var form_data = new FormData();
+      form_data.append("action", $("#select_action").val());
+      form_data.append("type", "action");
+      $.ajax({
+        type: "POST",
+        url: "/ask",
+        data: form_data,
+        success: (data) => {
+          console.log(data);
+          transactionTable = $("#transactionTable").DataTable({
+            "searching": false,
+            "autoWidth": true,
+            "lengthMenu": [5, 10, 20, 50],
+            "pageLength": 5,
+            "columns": [
+              // {
+              //   data: "orderID", 
+              //   orderable: false, 
+              //   render: function (data, type, obj, meta)
+              //   {
+              //     return '<input type="checkbox" name=shoporder_checked id="checked'+ data["orderID"] +'" value="' + data + '">';
+              //   }
+              // },
+              {
+                data: "recordID",
+                title: "Record ID"
+              },
+              {
+                data: "action",
+                title: "Action"
+              },
+              {
+                data: "time",
+                title: "Time"
+              },
+              {
+                data: "trader",
+                title: "Trader"
+              },
+              {
+                data: "amount_change",
+                title: "Amount Change"
               }
             ],
             "data": data['data']
@@ -1003,6 +1070,7 @@
       })
       loadShopTable();
       loadShopOrderTable();
+      loadTransactionTable();
     });
     
     function reloadShopTable() {
@@ -1047,7 +1115,28 @@
           dataType: "json",
           async: false        
       })
-    }  
+    }
+
+    function select_action() {
+      var action=$('#select_action').val();
+      var form_data = new FormData();
+      form_data.append("action", action);
+      form_data.append("type", "action");
+      $.ajax({
+        type: "POST",
+        url: "/ask",
+        data: form_data,
+        success: (data) => {
+            console.log(data)
+            transactionTable.clear().draw();
+            transactionTable.rows.add(data['data']).draw();
+        },
+          contentType: false,
+          processData: false,
+          dataType: "json",
+          async: false        
+      })
+    }
     
     function addShop() {
       var form_data = new FormData();
