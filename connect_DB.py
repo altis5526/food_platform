@@ -364,7 +364,7 @@ def update():
 
                     for (item, value) in items:
                         value = int(value)
-
+                        item.amount -= value
                         NewOrderContent = order_content_(
                             NewOrder.OID,
                             item.PID,
