@@ -822,7 +822,6 @@ def ask():
 
         return jsonify(ret)
 
-
 @app.route('/nav', methods = ['GET'])
 @login_required
 def nav():
