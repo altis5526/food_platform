@@ -318,14 +318,19 @@ def update():
 
         if ret['success']: 
 
-            shop = db.session.query(shop_).filter(shop_.SID == order_instance_.SID).first()
+            shop = db.session.query(shop_).filter(shop_.SID == str(message["shopid"])).first()
+            print("shop: ", shop)
             distance = db.session.query(func.ST_Distance_Sphere(func.ST_GeomFromText(shop.position), func.ST_GeomFromText(user.position))).first()[0]
             delivery = max(10, (distance + 50) // 100) if message['orderType'] == 'delivery' else 0
+            total_price = sum + delivery
+            print(distance)
+            print("delivery", delivery)
+            
 
-            if sum + delivery > user.balance: 
+            if total_price > user.balance: 
                 ret['success'] = False
-                ret.update({'message': 'You are so pooorrr.....\nExpensive is never the flaw of our product, but yours.'})
-
+                ret.update({'message': 'poor you'})
+                print(ret['message'])
 
             else:
                 ret.update({'message': 'You are so rich...'})
@@ -351,12 +356,12 @@ def update():
                         None,
                         None,
                         distance, 
-                        sum + delivery,
+                        int(total_price),
                         message['orderType']
                     )
                     
-                    user.balance -= sum + delivery
-                    shopmanagerInfo.balance += sum + delivery
+                    user.balance -= int(total_price)
+                    shopmanagerInfo.balance += int(total_price)
 
                     db.session.add(NewOrder)
                     db.session.commit()
@@ -419,24 +424,24 @@ def update():
             userInfo.balance += orderInfo.amount
             shopmanagerInfo.balance -= orderInfo.amount
 
-            # No transaction generated when cancelled
-            # new_record_user = trade_(TID = null,
-            #                         UID = orderInfo.UID,
-            #                         type = "Receive",
-            #                         amount = orderInfo.amount,
-            #                         trade_time = orderInfo.done_time,
-            #                         trader = userInfo.name
-            #                         )
-            # new_record_shop = trade_(TID = null,
-            #                         UID = orderInfo.SID,
-            #                         type = "Payment",
-            #                         amount = orderInfo.amount,
-            #                         trade_time = orderInfo.done_time,
-            #                         trader = shopInfo.shop_name
-            #                         )
+            # No transaction generated when cancelled??
+            new_record_user = trade_(TID = null,
+                                    UID = orderInfo.UID,
+                                    type = "Receive",
+                                    amount = orderInfo.amount,
+                                    trade_time = orderInfo.done_time,
+                                    trader = userInfo.name
+                                    )
+            new_record_shop = trade_(TID = null,
+                                    UID = orderInfo.SID,
+                                    type = "Payment",
+                                    amount = orderInfo.amount,
+                                    trade_time = orderInfo.done_time,
+                                    trader = shopInfo.shop_name
+                                    )
 
-            # db.session.add(new_record_user)
-            # db.session.add(new_record_shop)
+            db.session.add(new_record_user)
+            db.session.add(new_record_shop)
             
             db.session.commit()
 
