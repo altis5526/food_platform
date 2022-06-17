@@ -638,7 +638,7 @@ def ask():
 
     if message['type'] == 'findspecificShopOrder':
 
-        print('Asking shop order for: ', message)
+        print('Asking shop order for.......: ', message)
 
         userID = session.get('_user_id')
         userInfo = db.session.query(user_).filter(user_.UID == userID).first()
@@ -649,10 +649,13 @@ def ask():
         product_list = []
         subtotal_price = 0
         order_content = db.session.query(order_content_).filter(order_content_.OID == message['OID']).all()
+        order_instance_content = db.session.query(order_instance_).filter(order_instance_.OID == message['OID']).first()
 
         distance = db.session.query(func.ST_Distance_Sphere(func.ST_GeomFromText(shopInfo.position), func.ST_GeomFromText(userInfo.position))).first()[0]
-        fee = (distance + 50) // 100
-    
+        if order_instance_content.type == 'pickUp':
+            fee = 0
+        else:
+            fee = (distance + 50) // 100
 
         for content in order_content:
             product = db.session.query(item_).filter(content.PID == item_.PID).first()
