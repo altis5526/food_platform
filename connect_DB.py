@@ -339,7 +339,6 @@ def update():
                 ret.update({'delivery': delivery})
                 ret.update({'total': delivery + sum})
 
-
                 if message['chk'] == 'cal':
                     print('calcc')
                     return jsonify(ret)
@@ -394,7 +393,7 @@ def update():
         OID = int(message['OID'])
         # get shop manager info
         shopInfo = db.session.query(shop_).filter(shop_.SID == order_instance_.SID).first()
-        shopmanagerInfo = db.session.query(user_).filter(user_.UID == shopInfo.UID).first()
+        # shopmanagerInfo = db.session.query(user_).filter(user_.UID == shopInfo.UID).first()
         
         # get buyer info and order contents
         orderInfo = db.session.query(order_instance_).filter(order_instance_.OID == OID).first()
