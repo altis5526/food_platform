@@ -32,7 +32,7 @@ create table item (
     price numeric(20, 0) NOT NULL CHECK(price >= 0),
     content LONGBLOB NOT NULL,
     amount INT DEFAULT 0,
-    state INT DEFAULT 0,  
+    state_ INT DEFAULT 0,  
     FOREIGN KEY (SID) REFERENCES shop (SID)  
 );
 
