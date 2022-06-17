@@ -161,13 +161,15 @@ class trade_(db.Model):
     type = db.Column(db.String(16))
     amount = db.Column(db.NUMERIC(20, 0))
     trade_time = db.Column(db.DateTime)
+    trader = db.Column(db.String(128))
 
-    def __init__(self, TID, UID, type, amount, trade_time):
+    def __init__(self, TID, UID, type, amount, trade_time, trader):
         self.TID = TID
         self.UID = UID
         self.type = type
         self.amount = amount
         self.trade_time = trade_time
+        self.trader = trader
 
 
 """
@@ -186,9 +188,9 @@ class order_content_(db.Model):
     PID = db.Column(db.Integer, primary_key = True)
     amount = db.Column(db.NUMERIC(20, 0))
 
-    def __init__(self, OID, TID, amount):
+    def __init__(self, OID, PID, amount):
         self.OID = OID
-        self.TID = TID
+        self.PID = PID
         self.amount = amount
 
 # empty message for different attribute

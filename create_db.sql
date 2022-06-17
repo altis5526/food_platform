@@ -55,6 +55,7 @@ create table trade (
     type varchar(16),
     amount numeric(20, 0) NOT NULL CHECK(amount >= 0),
     trade_time TIMESTAMP(6) DEFAULT NOW(),
+    trader varchar(128),
     FOREIGN KEY (UID) REFERENCES user(UID)
 );
 
