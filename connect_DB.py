@@ -361,6 +361,20 @@ def update():
                     db.session.add(NewOrder)
                     db.session.commit()
 
+                    new_record_user = trade_(TID = null,
+                                            UID = .UID,
+                                            type = "Receive",
+                                            amount = NewOrder.amount,
+                                            trade_time = None,
+                                            trader = userInfo.name
+                                            )
+                    new_record_shop = trade_(TID = null,
+                                            UID = NewOrder.SID,
+                                            type = "Payment",
+                                            amount = NewOrder.amount,
+                                            trade_time = None,
+                                            trader = shopInfo.shop_name
+                                            )
 
                     for (item, value) in items:
                         value = int(value)
