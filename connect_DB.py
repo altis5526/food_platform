@@ -367,20 +367,21 @@ def update():
                     db.session.commit()
 
                     new_record_user = trade_(TID = null,
-                                            UID = .UID,
-                                            type = "Receive",
-                                            amount = NewOrder.amount,
-                                            trade_time = None,
-                                            trader = userInfo.name
-                                            )
-                    new_record_shop = trade_(TID = null,
-                                            UID = NewOrder.SID,
+                                            UID = user.UID,
                                             type = "Payment",
                                             amount = NewOrder.amount,
                                             trade_time = None,
-                                            trader = shopInfo.shop_name
+                                            trader = shop.shop_name
                                             )
-
+                    new_record_shop = trade_(TID = null,
+                                            UID = shopmanagerInfo.UID,
+                                            type = "Receive",
+                                            amount = NewOrder.amount,
+                                            trade_time = None,
+                                            trader = user.name
+                                            )
+                    db.session.add(new_record_user)
+                    db.session.add(new_record_shop)
                     for (item, value) in items:
                         value = int(value)
                         item.amount -= value
@@ -392,7 +393,7 @@ def update():
                         db.session.add(NewOrderContent)
                     db.session.commit()
  
-                return jsonify(ret)
+            return jsonify(ret)
 
 
         else:
@@ -400,55 +401,61 @@ def update():
             ret.update({'message': error_message})
             return jsonify(ret)
         
+        # Should not reach here
         return jsonify({'success': False})
           
     if message['type'] == 'delete_order':
 
         OID = int(message['OID'])
+        
+        orderInfo = db.session.query(order_instance_).filter(order_instance_.OID == OID).first()
+        if not orderInfo : return jsonify({'success': False})
+        
         # get shop manager info
-        shopInfo = db.session.query(shop_).filter(shop_.SID == order_instance_.SID).first()
-        # shopmanagerInfo = db.session.query(user_).filter(user_.UID == shopInfo.UID).first()
+        shopInfo = db.session.query(shop_).filter(shop_.SID == orderInfo.SID).first()
+        shopmanagerInfo = db.session.query(user_).filter(user_.UID == shopInfo.UID).first()
         
         # get buyer info and order contents
-        orderInfo = db.session.query(order_instance_).filter(order_instance_.OID == OID).first()
         userInfo = db.session.query(user_).filter(orderInfo.UID == user_.UID).first()
-        order_contentInfo = db.session.query(order_content_).filter(order_content_.OID==OID).all()
+        order_contentInfo = db.session.query(order_content_).filter(order_content_.OID == OID).all()
 
-        if orderInfo:
-            for content in order_contentInfo:
-                product = db.session.query(item_).filter(content.PID == item_.PID).first()
-                product.amount += content.amount
-                
-            orderInfo.done_time = func.current_timestamp()
-            orderInfo.state = 'Cancelled'
-            userInfo.balance += orderInfo.amount
-            shopmanagerInfo.balance -= orderInfo.amount
 
-            # No transaction generated when cancelled??
-            new_record_user = trade_(TID = null,
-                                    UID = orderInfo.UID,
-                                    type = "Receive",
-                                    amount = orderInfo.amount,
-                                    trade_time = orderInfo.done_time,
-                                    trader = userInfo.name
-                                    )
-            new_record_shop = trade_(TID = null,
-                                    UID = orderInfo.SID,
-                                    type = "Payment",
-                                    amount = orderInfo.amount,
-                                    trade_time = orderInfo.done_time,
-                                    trader = shopInfo.shop_name
-                                    )
-
-            db.session.add(new_record_user)
-            db.session.add(new_record_shop)
+        for content in order_contentInfo:
+            product = db.session.query(item_).filter(content.PID == item_.PID).first()
+            product.amount += content.amount
             
-            db.session.commit()
 
-            return jsonify({'success': True})
-        else:
 
-            return jsonify({'success': False})
+        orderInfo.done_time = func.current_timestamp()
+        orderInfo.state = 'Cancelled'
+        userInfo.balance += orderInfo.amount
+        shopmanagerInfo.balance -= orderInfo.amount
+
+        db.session.commit()
+
+        # No transaction generated when cancelled??
+        new_record_user = trade_(TID = None,
+                                UID = orderInfo.UID,
+                                type = "Receive",
+                                amount = int(orderInfo.amount),
+                                trade_time = orderInfo.done_time,
+                                trader = userInfo.name
+                                )
+        new_record_shop = trade_(TID = None,
+                                UID = orderInfo.SID,
+                                type = "Payment",
+                                amount = int(orderInfo.amount),
+                                trade_time = orderInfo.done_time,
+                                trader = shopInfo.shop_name
+                                )
+
+        db.session.add(new_record_user)
+        db.session.add(new_record_shop)
+        
+        db.session.commit()
+
+        return jsonify({'success': True})
+    
 
     if message['type'] == 'done_order':
         
@@ -471,24 +478,24 @@ def update():
 
 
             ## 交易當下就產生trade record
-            new_record_user = trade_(TID = null,
-                                    UID = orderInfo.UID,
-                                    type = "Receive",
-                                    amount = orderInfo.amount,
-                                    trade_time = orderInfo.done_time,
-                                    trader = userInfo.name
-                                    )
+            # new_record_user = trade_(TID = null,
+            #                         UID = orderInfo.UID,
+            #                         type = "Receive",
+            #                         amount = orderInfo.amount,
+            #                         trade_time = orderInfo.done_time,
+            #                         trader = userInfo.name
+            #                         )
 
-            new_record_shop = trade_(TID = null,
-                                    UID = orderInfo.SID,
-                                    type = "Payment",
-                                    amount = orderInfo.amount,
-                                    trade_time = orderInfo.done_time,
-                                    trader = shopInfo.shop_name
-                                    )
+            # new_record_shop = trade_(TID = null,
+            #                         UID = orderInfo.SID,
+            #                         type = "Payment",
+            #                         amount = orderInfo.amount,
+            #                         trade_time = orderInfo.done_time,
+            #                         trader = shopInfo.shop_name
+            #                         )
             
-            db.session.add(new_record_user)
-            db.session.add(new_record_shop)
+            # db.session.add(new_record_user)
+            # db.session.add(new_record_shop)
 
             db.session.commit()
 
@@ -757,10 +764,14 @@ def ask():
         ret = {'success': False, 'data': []}
 
         for transaction in transactionInfo:
-            amount_int = int(transaction.amount)
+            
             amount = str(transaction.amount)
-            if amount_int > 0:
+
+            if str(transaction.type) == 'Payment':
+                amount = '-' + amount
+            else :
                 amount = '+' + amount
+
             ret["data"].append({
                 'recordID': int(transaction.TID),
                 'action': str(transaction.type),
@@ -820,7 +831,10 @@ def nav():
 
     userInfo = db.session.query(user_).filter(user_.UID == userID).first()
     shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
-    shoporderInfo = db.session.query(order_instance_).filter(order_instance_.SID == shop_.SID).all()
+    if not shopInfo :
+        shoporderInfo = []
+    else :
+        shoporderInfo = db.session.query(order_instance_).filter(order_instance_.SID == shopInfo.SID).all()
     
     info = {}
     info.update({'userAccount': userInfo.account})
@@ -865,7 +879,7 @@ def nav():
         print('This user has no shop.')
         info.update({'hasShop': False})
 
-    if shoporderInfo != None:
+    if len(shoporderInfo) > 0:
         print('This user has a shoporder.')
         info.update({"hasShopOrder": True})
         info.update({"ShopOrder": []})
