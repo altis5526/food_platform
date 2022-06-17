@@ -80,8 +80,9 @@ create table item (
     SID INT NOT NULL, 
     item_name varchar(256) NOT NULL,
     price numeric(20, 0) NOT NULL CHECK(price >= 0),
-    content LONGBOLB NOT NULL,
+    content LONGBLOB NOT NULL,
     amount INT DEFAULT 0,
+    state_ INT DEFAULT 0,  
     FOREIGN KEY (SID) REFERENCES shop (SID)  
 );
 """
@@ -93,6 +94,7 @@ class item_(db.Model):
     price = db.Column(db.NUMERIC(20, 0))
     content = db.Column(db.LargeBinary)
     amount = db.Column(db.Integer)
+    state_ = db.Column(db.Integer)
 
     def __init__(self, PID, SID, item_name, price, content, amount):
         self.PID = PID
@@ -101,6 +103,7 @@ class item_(db.Model):
         self.price = price
         self.content = content
         self.amount = amount
+        self.state_ = 0
 
 
 

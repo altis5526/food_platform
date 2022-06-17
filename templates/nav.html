@@ -403,6 +403,11 @@
             <table id="myOrderTable" class="display" style=" margin-top: 15px; width:100%;"></table>
           </div>
         </div>
+
+        <div class="row">
+          <button onclick="delByBatch('myorder_checked')" style="margin-left: 18px; margin-top: 30px; margin-bottom: 30px;" class="btn btn-primary">Cancel selected</button>
+        </div>
+
         <!-- Modal -->
         <div class="modal fade" id="MyOrderModal" data-backdrop="static" tabindex="-1" role="dialog"
           aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -475,8 +480,8 @@
         </div>
 
         <div class="row">
-          <button onclick="delByBatch()" style="margin-left: 18px; margin-top: 30px; margin-bottom: 30px;" class="btn btn-primary">Cancel selected</button>
-          <button onclick="doneByBatch()" style="margin-left: 18px; margin-top: 30px; margin-bottom: 30px;" class="btn btn-primary">Done selected</button>
+          <button onclick="delByBatch('shoporder_checked')" style="margin-left: 18px; margin-top: 30px; margin-bottom: 30px;" class="btn btn-primary">Cancel selected</button>
+          <button onclick="doneByBatch('shoporder_checked')" style="margin-left: 18px; margin-top: 30px; margin-bottom: 30px;" class="btn btn-primary">Done selected</button>
         </div>
         
 
@@ -736,7 +741,7 @@
                 orderable: false, 
                 render: function (data, type, obj, meta)
                 {
-                  return '<input type="checkbox" name=shoporder_checked id="checked'+ data["orderID"] +'" value="' + data + '">';
+                  return '<input type="checkbox" class="myOrder" name=myorder_checked id="checked'+ data["orderID"] +'" value="' + data + '">';
                 }
               },
               {
@@ -809,7 +814,7 @@
         success: (data) => {
           // alert("I already send the order, but they won't send anything to you. Ha!~ Ha!~");
           if(data['success']) {
-            alert('order successfully sent...');
+            alert('Order successfully sent...');
             window.location.replace('/nav');
           }
           else {
@@ -858,8 +863,8 @@
           }
           else {
             // alert('Your order have been sent successfully!!');  
-            // alert(data['message']);
-            alert("You have no enough money.");
+            alert(data['message']);
+            // alert("You have no enough money.");
           }
         },
         contentType: false,
@@ -996,7 +1001,7 @@
                 orderable: false, 
                 render: function (data, type, obj, meta)
                 {
-                  return '<input type="checkbox" name=shoporder_checked id="checked'+ data["orderID"] +'" value="' + data + '">';
+                  return '<input type="checkbox" class="shopOrder" name=shoporder_checked id="checked'+ data["orderID"] +'" value="' + data + '">';
                 }
               },
               {
@@ -1132,16 +1137,17 @@
       orderList[x] = currentVal + val;
     }
 
-    function delByBatch(){
-      $("input[name='shoporder_checked']").each(function(){
+    function delByBatch(type){
+      console.log(type, $(this))
+      $("input[name=" + type + "]").each(function(){
         if($(this).prop('checked')){
           delOrder($(this).val());
         }
       });
     }
 
-    function doneByBatch(){
-      $("input[name='shoporder_checked']").each(function(){
+    function doneByBatch(type){
+      $("input[name=" + type + "]").each(function(){
         if($(this).prop('checked')){
           doneOrder($(this).val());
         }
@@ -1511,7 +1517,7 @@
             
           }
           else {
-            alert('Order ID ' + item + ' does not exist.');
+            alert(data['message'])
             window.location.replace('/nav');
           }
         },
@@ -1536,7 +1542,8 @@
             
           }
           else {
-            alert('Order ID ' + item + ' does not exist.');
+            // alert('Order ID ' + item + ' does not exist.');
+            alert(data['message']);
             window.location.replace('/nav');
           }
         },
