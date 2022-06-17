@@ -705,23 +705,25 @@ def ask():
         print(f'query status: {message}')
         userID = session.get('_user_id')
 
-        rule1 = and_(
-            order_instance_.SID == shop_.SID,
-            shop_.UID == userID,
-            order_instance_.state == message['status'],
-        )
-
         rule2 = and_(
             order_instance_.SID == shop_.SID,
             shop_.UID == userID,
         )
 
+        rule1 = and_(
+            order_instance_.SID == shop_.SID,
+            shop_.UID == userID,
+            order_instance_.state == message['status']
+        )
+
         if message['status'] == 'all' or message['status'] == 'status':
             shoporderInfo = db.session.query(order_instance_).filter(rule2).all()
+            
         else:
             shoporderInfo = db.session.query(order_instance_).filter(rule1).all()
-
+            
         shopInfo = db.session.query(shop_).filter(shop_.UID == userID).first()
+        print("shopInfo: ", shoporderInfo)
 
         ret = {'success': False, 'data': []}
         product_list = [] 
