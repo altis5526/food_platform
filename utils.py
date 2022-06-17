@@ -93,14 +93,16 @@ class item_(db.Model):
     price = db.Column(db.NUMERIC(20, 0))
     content = db.Column(db.LargeBinary)
     amount = db.Column(db.Integer)
+    deleted = db.Column(db.Integer)
 
-    def __init__(self, PID, SID, item_name, price, content, amount):
+    def __init__(self, PID, SID, item_name, price, content, amount, deleted):
         self.PID = PID
         self.SID = SID
         self.item_name = item_name
         self.price = price
         self.content = content
         self.amount = amount
+        self.deleted = deleted
 
 
 

@@ -434,6 +434,8 @@ def update():
         db.session.commit()
 
         # No transaction generated when cancelled??
+        print("gogo")
+        print(orderInfo.UID)
         new_record_user = trade_(TID = None,
                                 UID = orderInfo.UID,
                                 type = "Receive",
@@ -732,6 +734,7 @@ def ask():
                 product_list.append(product)
                 total_price += product.price * content.amount
             
+            
             ret["data"].append({
                 'orderID': int(order.OID),
                 'status': str(order.state),
@@ -809,11 +812,16 @@ def ask():
             
             shopInfo = db.session.query(shop_).filter(shop_.SID == order.SID).first()
 
+            if str(order.state) == 'Not-Finished' :
+                doneTime = '-'
+            else: 
+                doneTime = str(order.done_time)
+
             ret["data"].append({
                 'orderID': int(order.OID),
                 'status': str(order.state),
                 'start': str(order.create_time),
-                'end': str(order.done_time),
+                'end': doneTime,
                 'shop_name': str(shopInfo.shop_name),
                 'total_price': int(order.amount)
             })
